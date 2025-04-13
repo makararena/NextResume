@@ -19,7 +19,7 @@
           "value": "$NEXT_PUBLIC_BASE_URL"
         },
         {
-          "key": "Access-Control-Allow-Methods", 
+          "key": "Access-Control-Allow-Methods",
           "value": "GET, POST, PUT, DELETE, PATCH, OPTIONS"
         },
         {
@@ -50,7 +50,12 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/next"
+      "use": "@vercel/next",
+      "config": {
+        "includeFiles": [
+          "test/data/**"
+        ]
+      }
     }
   ],
   "rewrites": [
@@ -59,4 +64,4 @@
       "destination": "/api/$1"
     }
   ]
-} 
+}
