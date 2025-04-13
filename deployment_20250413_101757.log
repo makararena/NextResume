@@ -1,0 +1,440 @@
+=== DEPLOYMENT LOG Sun Apr 13 10:17:57 CEST 2025 ===
+[INFO] 2025-04-13 10:17:57 - Starting deployment process...
+[INFO] 2025-04-13 10:17:57 - Updating git repository...
+fatal: 'origin' does not appear to be a git repository
+fatal: Could not read from remote repository.
+
+Please make sure you have the correct access rights
+and the repository exists.
+[WARNING] 2025-04-13 10:17:57 - Failed to pull latest code, continuing with local version
+[INFO] 2025-04-13 10:17:57 - Checking environment variables...
+[INFO] 2025-04-13 10:17:57 - Loading variables from .env file
+[SUCCESS] 2025-04-13 10:17:57 - All required environment variables are set.
+[INFO] 2025-04-13 10:17:57 - Checking for Vercel CLI installation...
+[INFO] 2025-04-13 10:17:57 - Checking for security vulnerabilities...
+
+> nextjs-15-ai-resume-builder@0.1.0 security
+> npm audit --production
+
+npm warn config production Use `--omit=dev` instead.
+# npm audit report
+
+got  <11.8.5
+Severity: moderate
+Got allows a redirect to a UNIX socket - https://github.com/advisories/GHSA-pfrx-2q88-qq97
+fix available via `npm audit fix --force`
+Will install textract@0.20.0, which is a breaking change
+node_modules/got
+  textract  >=0.5.0
+  Depends on vulnerable versions of cheerio
+  Depends on vulnerable versions of epub2
+  Depends on vulnerable versions of got
+  Depends on vulnerable versions of j
+  Depends on vulnerable versions of marked
+  Depends on vulnerable versions of meow
+  Depends on vulnerable versions of xmldom
+  node_modules/textract
+
+jszip  <=3.7.1
+Severity: moderate
+jszip Vulnerable to Prototype Pollution - https://github.com/advisories/GHSA-jg8v-48h5-wgxg
+JSZip contains Path Traversal via loadAsync - https://github.com/advisories/GHSA-36fh-84j7-cv5h
+fix available via `npm audit fix --force`
+Will install textract@0.20.0, which is a breaking change
+node_modules/xlsx/node_modules/jszip
+  xlsx  *
+  Depends on vulnerable versions of jszip
+  node_modules/xlsx
+    j  *
+    Depends on vulnerable versions of xlsx
+    node_modules/j
+
+marked  <=4.0.9
+Severity: high
+Regular Expression Denial of Service in marked - https://github.com/advisories/GHSA-ch52-vgq2-943f
+Inefficient Regular Expression Complexity in marked - https://github.com/advisories/GHSA-rrrm-qjm4-v8hf
+Inefficient Regular Expression Complexity in marked - https://github.com/advisories/GHSA-5v2h-r2cx-5xgj
+fix available via `npm audit fix`
+node_modules/marked
+
+nanoid  <3.3.8
+Severity: moderate
+Predictable results in nanoid generation when given non-integer values - https://github.com/advisories/GHSA-mwcw-c2x4-8c55
+fix available via `npm audit fix`
+node_modules/nanoid
+
+nth-check  <2.0.1
+Severity: high
+Inefficient Regular Expression Complexity in nth-check - https://github.com/advisories/GHSA-rp65-9cf3-cjxr
+fix available via `npm audit fix`
+node_modules/nth-check
+  css-select  <=3.1.0
+  Depends on vulnerable versions of nth-check
+  node_modules/css-select
+    cheerio  0.19.0 - 1.0.0-rc.12
+    Depends on vulnerable versions of css-select
+    node_modules/cheerio
+
+trim-newlines  <3.0.1
+Severity: high
+Uncontrolled Resource Consumption in trim-newlines - https://github.com/advisories/GHSA-7p7h-4mm5-852v
+fix available via `npm audit fix --force`
+Will install textract@0.20.0, which is a breaking change
+node_modules/trim-newlines
+  meow  3.4.0 - 5.0.0
+  Depends on vulnerable versions of trim-newlines
+  node_modules/meow
+
+undici  4.5.0 - 5.28.4
+Severity: moderate
+Use of Insufficiently Random Values in undici - https://github.com/advisories/GHSA-c76h-2ccp-4975
+fix available via `npm audit fix`
+node_modules/undici
+
+
+xml2js  <0.5.0
+Severity: moderate
+xml2js is vulnerable to prototype pollution - https://github.com/advisories/GHSA-776f-qx25-q3cc
+fix available via `npm audit fix --force`
+Will install textract@0.20.0, which is a breaking change
+node_modules/xml2js
+  epub2  <=3.0.1
+  Depends on vulnerable versions of xml2js
+  node_modules/epub2
+
+xmldom  *
+Severity: critical
+Misinterpretation of malicious XML input - https://github.com/advisories/GHSA-h6q6-9hqw-rwfv
+xmldom allows multiple root nodes in a DOM - https://github.com/advisories/GHSA-crh6-fp67-6883
+Misinterpretation of malicious XML input - https://github.com/advisories/GHSA-5fg8-2547-mr8q
+fix available via `npm audit fix --force`
+Will install textract@0.20.0, which is a breaking change
+node_modules/xmldom
+
+16 vulnerabilities (6 moderate, 9 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+[WARNING] 2025-04-13 10:17:58 - Security check found issues. Review the log file for details.
+[INFO] 2025-04-13 10:18:04 - Cleaning up the environment...
+
+> nextjs-15-ai-resume-builder@0.1.0 clean
+> rm -rf .next && rm -rf node_modules/.cache
+
+[INFO] 2025-04-13 10:18:04 - Installing dependencies with legacy peer deps...
+
+> nextjs-15-ai-resume-builder@0.1.0 install-deps
+> npm install --legacy-peer-deps
+
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'got@5.7.1',
+npm warn EBADENGINE   required: { node: '>=0.10.0 <7' },
+npm warn EBADENGINE   current: { node: 'v23.9.0', npm: '11.2.0' }
+npm warn EBADENGINE }
+
+> nextjs-15-ai-resume-builder@0.1.0 postinstall
+> prisma generate
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 50ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Help us improve the Prisma ORM for everyone. Share your feedback in a short 2-min survey: https://pris.ly/orm/survey/release-5-22
+
+
+up to date, audited 738 packages in 2s
+
+151 packages are looking for funding
+  run `npm fund` for details
+
+16 vulnerabilities (6 moderate, 9 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+[INFO] 2025-04-13 10:18:06 - Running linting checks...
+
+> nextjs-15-ai-resume-builder@0.1.0 lint-for-build
+> next lint || true
+
+
+./src/app/(main)/editor/ColorPicker.tsx
+38:9  Error: 'subscriptionLevel' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/editor/CoverLetterGenerator.tsx
+6:10  Error: 'Input' is defined but never used.  @typescript-eslint/no-unused-vars
+39:10  Error: 'isFetchingJobDesc' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+122:6  Warning: React Hook useEffect has a missing dependency: 'fetchJobDescription'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(main)/editor/HRMessageGenerator.tsx
+26:33  Error: 'MessageSquare' is defined but never used.  @typescript-eslint/no-unused-vars
+39:10  Error: 'isFetchingJobDesc' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+123:6  Warning: React Hook useEffect has a missing dependency: 'fetchJobDescription'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(main)/editor/ResumeEditor.tsx
+16:10  Error: 'ArrowLeft' is defined but never used.  @typescript-eslint/no-unused-vars
+16:21  Error: 'ArrowRight' is defined but never used.  @typescript-eslint/no-unused-vars
+16:33  Error: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+16:60  Error: 'Save' is defined but never used.  @typescript-eslint/no-unused-vars
+16:66  Error: 'Check' is defined but never used.  @typescript-eslint/no-unused-vars
+16:73  Error: 'Loader' is defined but never used.  @typescript-eslint/no-unused-vars
+17:8  Error: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/editor/ResumePreviewSection.tsx
+15:7  Error: 'A4_ASPECT_RATIO' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/editor/actions.ts
+10:10  Error: 'revalidatePath' is defined but never used.  @typescript-eslint/no-unused-vars
+11:10  Error: 'redirect' is defined but never used.  @typescript-eslint/no-unused-vars
+14:3  Error: 'formatDateYYYMMDD' is defined but never used.  @typescript-eslint/no-unused-vars
+15:3  Error: 'getFileNameWithoutExtension' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/editor/ai-mode/AIResumeUploader.tsx
+15:8  Error: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/editor/forms/GenerateSummaryButton.tsx
+18:9  Error: 'subscriptionLevel' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/editor/forms/GenerateWorkExperienceButton.tsx
+39:9  Error: 'subscriptionLevel' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/editor/forms/PersonalInfoForm.tsx
+89:70  Error: 'onChange' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/resumes/ResumeGroupManager.tsx
+16:22  Error: 'PlusCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/resumes/ResumeItem.tsx
+28:43  Error: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+52:9  Error: 'router' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/resumes/ResumeList.tsx
+3:10  Error: 'Card' is defined but never used.  @typescript-eslint/no-unused-vars
+11:45  Error: 'CalendarIcon' is defined but never used.  @typescript-eslint/no-unused-vars
+25:10  Error: 'format' is defined but never used.  @typescript-eslint/no-unused-vars
+94:54  Error: 'totalCount' is defined but never used.  @typescript-eslint/no-unused-vars
+99:10  Error: 'isLoading' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+270:14  Error: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/resumes/actions.ts
+8:10  Error: 'getUserSubscriptionLevel' is defined but never used.  @typescript-eslint/no-unused-vars
+35:3  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+37:5  Error: Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free.  @typescript-eslint/ban-ts-comment
+151:15  Error: 'originalId' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+151:27  Error: 'createdAt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+151:38  Error: 'updatedAt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+159:40  Error: 'id' is defined but never used.  @typescript-eslint/no-unused-vars
+159:44  Error: 'createdAt' is defined but never used.  @typescript-eslint/no-unused-vars
+159:55  Error: 'updatedAt' is defined but never used.  @typescript-eslint/no-unused-vars
+159:66  Error: 'resumeId' is defined but never used.  @typescript-eslint/no-unused-vars
+162:35  Error: 'id' is defined but never used.  @typescript-eslint/no-unused-vars
+162:39  Error: 'createdAt' is defined but never used.  @typescript-eslint/no-unused-vars
+162:50  Error: 'updatedAt' is defined but never used.  @typescript-eslint/no-unused-vars
+162:61  Error: 'resumeId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(main)/resumes/page.tsx
+7:8  Error: 'CreateResumeButton' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/ai-mode/actions.ts
+6:10  Error: 'env' is defined but never used.  @typescript-eslint/no-unused-vars
+135:57  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+144:52  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/error.tsx
+45:13  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+45:37  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/not-found.tsx
+25:27  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+25:47  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/page.tsx
+9:3  Error: 'ChevronDown' is defined but never used.  @typescript-eslint/no-unused-vars
+10:3  Error: 'BarChart2' is defined but never used.  @typescript-eslint/no-unused-vars
+172:59  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+189:25  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+189:60  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+271:19  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+332:42  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+332:102  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+336:42  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+336:106  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+354:19  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+355:77  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+362:19  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+364:27  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+407:33  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+426:54  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+427:87  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./src/app/privacy/page.tsx
+112:58  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+120:159  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+120:175  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./src/components/ModeSelectionDialog.tsx
+3:10  Error: 'useState' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ResumePreview.tsx
+1:8  Error: 'useDimensions' is defined but never used.  @typescript-eslint/no-unused-vars
+16:7  Error: 'A4_WIDTH' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+17:7  Error: 'A4_HEIGHT' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+29:10  Error: 'contentHeight' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+29:25  Error: 'setContentHeight' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+328:5  Error: 'borderStyle' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+518:29  Error: 'borderStyle' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/SuccessModal.tsx
+50:3  Error: 'title' is defined but never used.  @typescript-eslint/no-unused-vars
+51:3  Error: 'message' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/monitoring.ts
+15:29  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+20:20  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+27:29  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+39:70  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/openai.ts
+73:40  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+118:40  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+138:41  Error: 'jobDescription' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+138:57  Error: 'additionalInfo' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+346:20  Error: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+463:32  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+475:17  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+571:17  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/permissions.ts
+4:3  Error: 'subscriptionLevel' is defined but never used.  @typescript-eslint/no-unused-vars
+5:3  Error: 'currentResumeCount' is defined but never used.  @typescript-eslint/no-unused-vars
+11:31  Error: 'subscriptionLevel' is defined but never used.  @typescript-eslint/no-unused-vars
+16:38  Error: 'subscriptionLevel' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/lib/subscription.ts
+6:10  Error: 'userId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/middleware.ts
+2:15  Error: 'NextRequest' is defined but never used.  @typescript-eslint/no-unused-vars
+3:10  Error: 'auth' is defined but never used.  @typescript-eslint/no-unused-vars
+21:24  Error: 'evt' is defined but never used.  @typescript-eslint/no-unused-vars
+23:9  Error: 'response' is never reassigned. Use 'const' instead.  prefer-const
+
+./src/types/pdf-parse.d.ts
+3:29  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+11:11  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+12:15  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+[INFO] 2025-04-13 10:18:09 - Lint check complete (warnings ignored for production)
+[INFO] 2025-04-13 10:18:09 - Building the application...
+
+> nextjs-15-ai-resume-builder@0.1.0 prebuild
+> npm run clean
+
+
+> nextjs-15-ai-resume-builder@0.1.0 clean
+> rm -rf .next && rm -rf node_modules/.cache
+
+
+> nextjs-15-ai-resume-builder@0.1.0 build
+> prisma generate && next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 39ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+
+   ▲ Next.js 15.3.0
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 10.0s
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/10) ...
+   Generating static pages (2/10) 
+   Generating static pages (4/10) 
+   Generating static pages (7/10) 
+ ✓ Generating static pages (10/10)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    9.18 kB         174 kB
+├ ○ /_not-found                            152 B         102 kB
+├ ƒ /api/resumes/[id]/job-description      152 B         102 kB
+├ ƒ /editor                              90.6 kB         275 kB
+├ ƒ /editor/ai-mode                      44.6 kB         193 kB
+├ ○ /privacy                               152 B         102 kB
+├ ƒ /resumes                             17.7 kB         189 kB
+├ ƒ /sign-in/[[...sign-in]]                347 B         133 kB
+├ ƒ /sign-up/[[...sign-up]]                347 B         133 kB
+├ ○ /terms                                 152 B         102 kB
+└ ○ /tos                                   152 B         102 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/4bd1b696-9c1a011dfad259c4.js  53.2 kB
+  ├ chunks/684-d23a78c4a461a3d9.js       46.4 kB
+  └ other shared chunks (total)          2.03 kB
+
+
+ƒ Middleware                             72.8 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+
+> nextjs-15-ai-resume-builder@0.1.0 postbuild
+> prisma migrate deploy
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "railway", schema "public" at "gondola.proxy.rlwy.net:23117"
+
+8 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+[INFO] 2025-04-13 10:18:34 - Preparing for Vercel deployment...
+
+> nextjs-15-ai-resume-builder@0.1.0 prepare-vercel
+> prisma generate && prisma migrate deploy
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 64ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want real-time updates to your database without manual polling? Discover how with Pulse: https://pris.ly/tip-0-pulse
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "railway", schema "public" at "gondola.proxy.rlwy.net:23117"
+
+8 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+[INFO] 2025-04-13 10:18:37 - Deploying to Vercel production environment...
+Vercel CLI 41.4.1
+Retrieving project…
+Deploying makararenas-projects/ai-resume-builder
+Error: If `rewrites`, `redirects`, `headers`, `cleanUrls` or `trailingSlash` are used, then `routes` cannot be present.
+Learn More: https://vercel.link/mix-routing-props
+[ERROR] 2025-04-13 10:18:38 - Vercel deployment failed. Check the log file for details.

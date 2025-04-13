@@ -1,0 +1,14 @@
+# AI Resume Generator robots.txt
+# This file tells search engine crawlers which pages or files the crawler can or can't request from the site
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Block access to sensitive areas
+Disallow: /api/
+Disallow: /resumes/private/
+Disallow: /_next/
+
+# Sitemap location (once available)
+Sitemap: https://your-production-domain.com/sitemap.xml 
