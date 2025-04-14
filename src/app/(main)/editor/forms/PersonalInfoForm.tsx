@@ -11,20 +11,44 @@ import { Input } from "@/components/ui/input";
 import { EditorFormProps } from "@/lib/types";
 import { personalInfoSchema, PersonalInfoValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import ImageCropper from "@/components/ImageCropper";
 import Image from "next/image";
 import { Crop, User } from "lucide-react";
 import { toast } from "sonner";
+import isEqual from "lodash/isEqual";
 
 export default function PersonalInfoForm({
   resumeData,
   setResumeData,
 }: EditorFormProps) {
-  const form = useForm<PersonalInfoValues>({
-    resolver: zodResolver(personalInfoSchema),
-    defaultValues: {
+  // Add render count for debugging
+  const renderCount = useMemo(() => {
+    let count = 0;
+    return () => ++count;
+  }, []);
+  
+  console.log("🚀 Rendering PersonalInfoForm");
+  console.log(`🧮 PersonalInfoForm render count: ${renderCount()}`);
+  console.log("🚀 resumeData in PersonalInfoForm:", resumeData);
+  
+  // Store previous form values to prevent unnecessary updates
+  const prevFormValuesRef = useRef<PersonalInfoValues | null>(null);
+
+  // Handle photo correctly for the form
+  const photoValue = useMemo(() => {
+    // If it's a File object, use it directly
+    if (resumeData.photo instanceof File) {
+      return resumeData.photo;
+    }
+    // Otherwise, return undefined to avoid type issues
+    return undefined;
+  }, [resumeData.photo]);
+
+  const defaultValues = useMemo(() => {
+    console.log("🧩 Calculating defaultValues for PersonalInfoForm");
+    return {
       firstName: resumeData.firstName || "",
       lastName: resumeData.lastName || "",
       jobTitle: resumeData.jobTitle || "",
@@ -32,18 +56,98 @@ export default function PersonalInfoForm({
       country: resumeData.country || "",
       phone: resumeData.phone || "",
       email: resumeData.email || "",
-      photo: resumeData.photo || undefined,
-    },
+      // Only use photo if it's a File object, otherwise undefined
+      photo: photoValue,
+    };
+  }, [
+    resumeData.firstName,
+    resumeData.lastName,
+    resumeData.jobTitle,
+    resumeData.city,
+    resumeData.country,
+    resumeData.phone,
+    resumeData.email,
+    photoValue
+  ]);
+
+  const form = useForm<PersonalInfoValues>({
+    resolver: zodResolver(personalInfoSchema),
+    defaultValues,
   });
+  
+  // Reset form when defaultValues change
+  useEffect(() => {
+    form.reset(defaultValues);
+  }, [form, defaultValues]);
 
   useEffect(() => {
-    const { unsubscribe } = form.watch(async (values) => {
-      const isValid = await form.trigger();
-      if (!isValid) return;
-      setResumeData({ ...resumeData, ...values });
+    console.log("🎯 useEffect watch triggered in PersonalInfoForm");
+    
+    const subscription = form.watch((values) => {
+      console.log("👀 Form values changed in PersonalInfoForm:", values);
+      
+      // Don't proceed if values are same as the last ones we processed
+      if (prevFormValuesRef.current && isEqual(prevFormValuesRef.current, values)) {
+        console.log("⏭️ Skipping update - values identical to last processed values");
+        return;
+      }
+
+      // Store current values to prevent future duplicate processing
+      prevFormValuesRef.current = { ...values };
+
+      // Validate form
+      form.trigger().then((isValid) => {
+        console.log("✅ Form validation result:", isValid);
+        if (!isValid) {
+          console.log("⏭️ Skipping update - form invalid");
+          return;
+        }
+
+        // Use type-safe function for updating resumeData
+        setResumeData((prevData) => {
+          // Create new data with form values
+          const newData = { ...prevData, ...values };
+
+          console.log("🧩 setResumeData called in PersonalInfoForm");
+          
+          // Deep equality check to ensure we only update if there's an actual change
+          if (!isEqual(
+            { 
+              firstName: prevData.firstName, 
+              lastName: prevData.lastName,
+              jobTitle: prevData.jobTitle,
+              city: prevData.city,
+              country: prevData.country,
+              phone: prevData.phone,
+              email: prevData.email,
+              photo: prevData.photo
+            }, 
+            { 
+              firstName: newData.firstName, 
+              lastName: newData.lastName,
+              jobTitle: newData.jobTitle,
+              city: newData.city,
+              country: newData.country,
+              phone: newData.phone,
+              email: newData.email,
+              photo: newData.photo
+            }
+          )) {
+            console.log("✅ Data changed in PersonalInfoForm, updating state");
+            return newData;
+          } else {
+            console.log("🚫 No data change detected in PersonalInfoForm");
+            return prevData;
+          }
+        });
+      });
     });
-    return unsubscribe;
-  }, [form, resumeData, setResumeData]);
+
+    return () => {
+      console.log("🧹 Cleaning up subscription in PersonalInfoForm");
+      subscription.unsubscribe();
+    };
+  }, [form, setResumeData]);
 
   const photoInputRef = useRef<HTMLInputElement>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -65,7 +169,9 @@ export default function PersonalInfoForm({
 
   // Initialize photo preview if photo exists in resumeData
   useEffect(() => {
+    // If photo is a File, use it directly
     if (resumeData.photo instanceof File) {
+      console.log("Photo is a File object, creating preview URL");
       const objectUrl = URL.createObjectURL(resumeData.photo);
       setPhotoPreview(objectUrl);
       setOriginalPhotoUrl(objectUrl);
@@ -74,17 +180,27 @@ export default function PersonalInfoForm({
       return () => {
         URL.revokeObjectURL(objectUrl);
       };
-    } else if (typeof resumeData.photo === 'string' && resumeData.photo) {
+    } 
+    // If photo is a string URL
+    else if (typeof resumeData.photo === 'string' && resumeData.photo) {
+      console.log("Photo is a string URL, using directly for preview", resumeData.photo);
       setPhotoPreview(resumeData.photo);
       setOriginalPhotoUrl(resumeData.photo);
-    } else if (resumeData.photoUrl) {
-      // Handle photoUrl from AI-generated resume
+    } 
+    // If photoUrl exists (for AI-generated resumes)
+    else if (resumeData.photoUrl) {
+      console.log("Using photoUrl for preview", resumeData.photoUrl);
       setPhotoPreview(resumeData.photoUrl);
       // Don't set originalPhotoUrl to prevent unnecessary cropping
-      // But update the form value to use this URL
-      form.setValue("photo", resumeData.photoUrl, { shouldValidate: true });
+      // Users will need to crop the photo first to create a File object
+    } 
+    // No photo found
+    else {
+      console.log("No photo found in resumeData");
+      setPhotoPreview(null);
+      setOriginalPhotoUrl(null);
     }
-  }, [resumeData.photo, resumeData.photoUrl, form]);
+  }, [resumeData.photo, resumeData.photoUrl]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>, onChange: (file: File | null) => void) => {
     if (e.target.files && e.target.files[0]) {
@@ -121,7 +237,7 @@ export default function PersonalInfoForm({
       type: "image/jpeg" // Always use JPEG format for consistency
     });
     
-    // Update form
+    // Update form with the File object (this matches the expected type)
     form.setValue("photo", croppedFile, { shouldValidate: true });
     
     // Clean up any object URL we created for the original photo
@@ -132,6 +248,15 @@ export default function PersonalInfoForm({
     // Create preview URL
     const previewUrl = URL.createObjectURL(croppedFile);
     setPhotoPreview(previewUrl);
+    
+    // Also update the resumeData directly to ensure we have the latest photo
+    // This handles type issues by passing the actual File object
+    setResumeData((prevData) => {
+      return {
+        ...prevData,
+        photo: croppedFile
+      };
+    });
   };
 
   // Function to handle direct cropping of existing image URLs

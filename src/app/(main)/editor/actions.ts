@@ -20,113 +20,147 @@ import { canUseAITools } from "@/lib/permissions";
 export async function saveResume(values: ResumeValues) {
   const { id } = values;
 
-  console.log("received values", values);
+  console.log("🚀 SERVER: saveResume called with ID:", id);
+  console.time("⏱️ SERVER: Total saveResume duration");
 
-  const { photo, workExperiences, educations, ...resumeValues } =
-    resumeSchema.parse(values);
+  try {
+    console.log("SERVER: received values", JSON.stringify(values, null, 2).substring(0, 500) + "...");
 
-  const { userId } = await auth();
+    console.time("⏱️ SERVER: Schema validation");
+    const { photo, workExperiences, educations, ...resumeValues } =
+      resumeSchema.parse(values);
+    console.timeEnd("⏱️ SERVER: Schema validation");
 
-  if (!userId) {
-    throw new Error("User not authenticated");
-  }
+    console.time("⏱️ SERVER: Auth check");
+    const { userId } = await auth();
 
-  const subscriptionLevel = await getUserSubscriptionLevel(userId);
-
-  if (!id) {
-    const resumeCount = await prisma.resume.count({ where: { userId } });
-
-    if (!canCreateResume(subscriptionLevel, resumeCount)) {
-      throw new Error(
-        "Maximum resume count reached for this subscription level",
-      );
+    if (!userId) {
+      throw new Error("User not authenticated");
     }
-  }
+    console.timeEnd("⏱️ SERVER: Auth check");
 
-  const existingResume = id
-    ? await prisma.resume.findUnique({ where: { id, userId } })
-    : null;
+    console.time("⏱️ SERVER: Subscription check");
+    const subscriptionLevel = await getUserSubscriptionLevel(userId);
 
-  if (id && !existingResume) {
-    throw new Error("Resume not found");
-  }
+    if (!id) {
+      const resumeCount = await prisma.resume.count({ where: { userId } });
 
-  const hasCustomizations =
-    (resumeValues.borderStyle &&
-      resumeValues.borderStyle !== existingResume?.borderStyle) ||
-    (resumeValues.colorHex &&
-      resumeValues.colorHex !== existingResume?.colorHex);
-
-  if (hasCustomizations && !canUseCustomizations(subscriptionLevel)) {
-    throw new Error("Customizations not allowed for this subscription level");
-  }
-
-  let newPhotoUrl: string | undefined | null = undefined;
-
-  if (photo instanceof File) {
-    if (existingResume?.photoUrl) {
-      await del(existingResume.photoUrl);
+      if (!canCreateResume(subscriptionLevel, resumeCount)) {
+        throw new Error(
+          "Maximum resume count reached for this subscription level",
+        );
+      }
     }
+    console.timeEnd("⏱️ SERVER: Subscription check");
 
-    const blob = await put(`resume_photos/${path.extname(photo.name)}`, photo, {
-      access: "public",
-    });
+    console.time("⏱️ SERVER: Resume existence check");
+    const existingResume = id
+      ? await prisma.resume.findUnique({ where: { id, userId } })
+      : null;
 
-    newPhotoUrl = blob.url;
-  } else if (photo === null) {
-    if (existingResume?.photoUrl) {
-      await del(existingResume.photoUrl);
+    if (id && !existingResume) {
+      throw new Error("Resume not found");
     }
-    newPhotoUrl = null;
-  }
+    console.timeEnd("⏱️ SERVER: Resume existence check");
 
-  if (id) {
-    return prisma.resume.update({
-      where: { id },
-      data: {
-        ...resumeValues,
-        photoUrl: newPhotoUrl,
-        workExperiences: {
-          deleteMany: {},
-          create: workExperiences?.map((exp) => ({
-            ...exp,
-            startDate: exp.startDate ? new Date(exp.startDate) : undefined,
-            endDate: exp.endDate ? new Date(exp.endDate) : undefined,
-          })),
+    console.time("⏱️ SERVER: Customizations check");
+    const hasCustomizations =
+      (resumeValues.borderStyle &&
+        resumeValues.borderStyle !== existingResume?.borderStyle) ||
+      (resumeValues.colorHex &&
+        resumeValues.colorHex !== existingResume?.colorHex);
+
+    if (hasCustomizations && !canUseCustomizations(subscriptionLevel)) {
+      throw new Error("Customizations not allowed for this subscription level");
+    }
+    console.timeEnd("⏱️ SERVER: Customizations check");
+
+    console.time("⏱️ SERVER: Photo handling");
+    let newPhotoUrl: string | undefined | null = undefined;
+
+    if (photo instanceof File) {
+      console.log("SERVER: Processing photo upload, size:", photo.size);
+      if (existingResume?.photoUrl) {
+        await del(existingResume.photoUrl);
+      }
+
+      const blob = await put(`resume_photos/${path.extname(photo.name)}`, photo, {
+        access: "public",
+      });
+
+      newPhotoUrl = blob.url;
+      console.log("SERVER: Photo uploaded to URL:", newPhotoUrl);
+    } else if (photo === null) {
+      if (existingResume?.photoUrl) {
+        await del(existingResume.photoUrl);
+      }
+      newPhotoUrl = null;
+      console.log("SERVER: Photo removed");
+    }
+    console.timeEnd("⏱️ SERVER: Photo handling");
+
+    console.time("⏱️ SERVER: Database operation");
+    let result;
+    if (id) {
+      console.log("SERVER: Updating existing resume");
+      result = await prisma.resume.update({
+        where: { id },
+        data: {
+          ...resumeValues,
+          photoUrl: newPhotoUrl,
+          workExperiences: {
+            deleteMany: {},
+            create: workExperiences?.map((exp) => ({
+              ...exp,
+              startDate: exp.startDate ? new Date(exp.startDate) : undefined,
+              endDate: exp.endDate ? new Date(exp.endDate) : undefined,
+            })),
+          },
+          educations: {
+            deleteMany: {},
+            create: educations?.map((edu) => ({
+              ...edu,
+              startDate: edu.startDate ? new Date(edu.startDate) : undefined,
+              endDate: edu.endDate ? new Date(edu.endDate) : undefined,
+            })),
+          },
+          updatedAt: new Date(),
         },
-        educations: {
-          deleteMany: {},
-          create: educations?.map((edu) => ({
-            ...edu,
-            startDate: edu.startDate ? new Date(edu.startDate) : undefined,
-            endDate: edu.endDate ? new Date(edu.endDate) : undefined,
-          })),
+      });
+      console.log("SERVER: Resume updated successfully");
+    } else {
+      console.log("SERVER: Creating new resume");
+      result = await prisma.resume.create({
+        data: {
+          ...resumeValues,
+          userId,
+          photoUrl: newPhotoUrl,
+          workExperiences: {
+            create: workExperiences?.map((exp) => ({
+              ...exp,
+              startDate: exp.startDate ? new Date(exp.startDate) : undefined,
+              endDate: exp.endDate ? new Date(exp.endDate) : undefined,
+            })),
+          },
+          educations: {
+            create: educations?.map((edu) => ({
+              ...edu,
+              startDate: edu.startDate ? new Date(edu.startDate) : undefined,
+              endDate: edu.endDate ? new Date(edu.endDate) : undefined,
+            })),
+          },
         },
-        updatedAt: new Date(),
-      },
-    });
-  } else {
-    return prisma.resume.create({
-      data: {
-        ...resumeValues,
-        userId,
-        photoUrl: newPhotoUrl,
-        workExperiences: {
-          create: workExperiences?.map((exp) => ({
-            ...exp,
-            startDate: exp.startDate ? new Date(exp.startDate) : undefined,
-            endDate: exp.endDate ? new Date(exp.endDate) : undefined,
-          })),
-        },
-        educations: {
-          create: educations?.map((edu) => ({
-            ...edu,
-            startDate: edu.startDate ? new Date(edu.startDate) : undefined,
-            endDate: edu.endDate ? new Date(edu.endDate) : undefined,
-          })),
-        },
-      },
-    });
+      });
+      console.log("SERVER: New resume created successfully");
+    }
+    console.timeEnd("⏱️ SERVER: Database operation");
+
+    console.timeEnd("⏱️ SERVER: Total saveResume duration");
+    return result;
+  } catch (error) {
+    console.timeEnd("⏱️ SERVER: Total saveResume duration");
+    console.error("❌ SERVER: Error in saveResume:", error);
+    throw error;
   }
 }
 

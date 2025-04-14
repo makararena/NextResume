@@ -20,12 +20,18 @@ export default function ResumePreviewSection({
   className,
   showFormattingControls = false,
 }: ResumePreviewSectionProps) {
+  console.log("⚡ ResumePreviewSection rendering");
+  console.time("⏱️ ResumePreviewSection render time");
+  
   const [isReady, setIsReady] = useState(false);
   const [containerHeight, setContainerHeight] = useState(700);
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Calculate available height for the container
   useEffect(() => {
+    console.log("⚡ ResumePreviewSection height calculation effect running");
+    console.time("⏱️ Height calculation");
+    
     const calculateHeight = () => {
       // Get viewport height and subtract header/footer + margins
       const viewportHeight = window.innerHeight;
@@ -35,10 +41,13 @@ export default function ResumePreviewSection({
       // Calculate available height
       const availableHeight = viewportHeight - topOffset - bottomMargin;
       setContainerHeight(Math.max(500, availableHeight)); // Minimum 500px height
+      console.log("📏 Container height calculated:", Math.max(500, availableHeight));
     };
     
     calculateHeight();
     window.addEventListener('resize', calculateHeight);
+    
+    console.timeEnd("⏱️ Height calculation");
     
     return () => {
       window.removeEventListener('resize', calculateHeight);
@@ -46,8 +55,22 @@ export default function ResumePreviewSection({
   }, []);
   
   useEffect(() => {
+    console.log("⚡ Setting isReady to true");
     setIsReady(true);
   }, []);
+
+  // Log data size as this might be causing performance issues
+  useEffect(() => {
+    console.log("📊 Resume data size:", JSON.stringify(resumeData).length);
+    if (resumeData.workExperiences) {
+      console.log("📊 Work experiences count:", resumeData.workExperiences.length);
+    }
+    if (resumeData.educations) {
+      console.log("📊 Education entries count:", resumeData.educations.length);
+    }
+  }, [resumeData]);
+
+  console.timeEnd("⏱️ ResumePreviewSection render time");
 
   return (
     <div
@@ -71,10 +94,12 @@ export default function ResumePreviewSection({
         {isReady && (
           <div className="resume-preview-container w-full max-w-3xl flex justify-center items-start overflow-visible print:max-w-none print:shadow-none print:w-full print:h-full print:scale-100">
             <div style={{ transform: 'scale(0.5)', transformOrigin: 'top center' }}>
+              {console.time("⏱️ ResumePreview component render")}
               <ResumePreview
                 resumeData={resumeData}
                 className="w-full"
               />
+              {console.timeEnd("⏱️ ResumePreview component render")}
             </div>
           </div>
         )}

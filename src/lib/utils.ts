@@ -81,3 +81,22 @@ export function formatDateYYYMMDD(date: Date | null | undefined): string | undef
 export function getFileNameWithoutExtension(fileName: string): string {
   return fileName.replace(/\.[^/.]+$/, "");
 }
+
+/**
+ * Monitor memory usage and log it
+ * This is a browser-only function
+ */
+export function logMemoryUsage(label: string) {
+  if (typeof window !== 'undefined' && 'performance' in window && 'memory' in performance) {
+    // TypeScript doesn't recognize memory on performance by default
+    const memory = (performance as any).memory;
+    if (memory) {
+      console.log(`📊 Memory [${label}]:`, {
+        totalJSHeapSize: `${(memory.totalJSHeapSize / (1024 * 1024)).toFixed(2)} MB`,
+        usedJSHeapSize: `${(memory.usedJSHeapSize / (1024 * 1024)).toFixed(2)} MB`,
+        jsHeapSizeLimit: `${(memory.jsHeapSizeLimit / (1024 * 1024)).toFixed(2)} MB`,
+        usagePercentage: `${((memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100).toFixed(2)}%`
+      });
+    }
+  }
+}

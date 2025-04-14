@@ -11,29 +11,100 @@ import { Input } from "@/components/ui/input";
 import { EditorFormProps } from "@/lib/types";
 import { generalInfoSchema, GeneralInfoValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
+import isEqual from "lodash/isEqual";
 
 export default function GeneralInfoForm({
   resumeData,
   setResumeData,
 }: EditorFormProps) {
-  const form = useForm<GeneralInfoValues>({
-    resolver: zodResolver(generalInfoSchema),
-    defaultValues: {
+  // Add render count
+  const renderCount = useMemo(() => {
+    let count = 0;
+    return () => ++count;
+  }, []);
+  
+  console.log("🚀 Rendering GeneralInfoForm");
+  console.log(`🧮 GeneralInfoForm render count: ${renderCount()}`);
+  console.log("🚀 resumeData in GeneralInfoForm:", resumeData);
+  
+  // Store previous form values to prevent unnecessary updates
+  const prevFormValuesRef = useRef<GeneralInfoValues | null>(null);
+
+  const defaultValues = useMemo(() => {
+    console.log("🧩 Calculating defaultValues", {
+      title: resumeData.title,
+      description: resumeData.description,
+    });
+    return {
       title: resumeData.title || "",
       description: resumeData.description || "",
-    },
+    };
+  }, [resumeData.title, resumeData.description]);
+
+  const form = useForm<GeneralInfoValues>({
+    resolver: zodResolver(generalInfoSchema),
+    defaultValues,
   });
 
+  // Reset form when defaultValues change
   useEffect(() => {
-    const { unsubscribe } = form.watch(async (values) => {
+    form.reset(defaultValues);
+  }, [form, defaultValues]);
+
+  useEffect(() => {
+    console.log("🎯 useEffect triggered in GeneralInfoForm");
+
+    const subscription = form.watch(async (values) => {
+      console.log("👀 Form values changed:", values);
+      
+      // Don't proceed if the form is not filled out enough
+      if (!values.title && !values.description) {
+        console.log("⏭️ Skipping update - not enough form data");
+        return;
+      }
+
+      // Don't proceed if values are same as the last ones we processed
+      if (prevFormValuesRef.current && isEqual(prevFormValuesRef.current, values)) {
+        console.log("⏭️ Skipping update - values identical to last processed values");
+        return;
+      }
+
       const isValid = await form.trigger();
-      if (!isValid) return;
-      setResumeData({ ...resumeData, ...values });
+      console.log("✅ Form validation result:", isValid);
+      if (!isValid) {
+        console.log("⏭️ Skipping update - form invalid");
+        return;
+      }
+
+      // Store current values to prevent future duplicate processing
+      prevFormValuesRef.current = { ...values };
+
+      setResumeData((prevResumeData) => {
+        const newData = { ...prevResumeData, ...values };
+
+        console.log("🧩 setResumeData called in GeneralInfoForm");
+        console.log("Prev data:", prevResumeData);
+        console.log("New data:", newData);
+
+        // Deep equality check to ensure we only update if there's an actual change
+        if (!isEqual(prevResumeData.title, newData.title) || 
+            !isEqual(prevResumeData.description, newData.description)) {
+          console.log("✅ Data changed, updating state");
+          return newData;
+        } else {
+          console.log("🚫 No data change detected");
+          return prevResumeData;
+        }
+      });
     });
-    return unsubscribe;
-  }, [form, resumeData, setResumeData]);
+
+    return () => {
+      console.log("🧹 Cleaning up subscription in GeneralInfoForm");
+      subscription.unsubscribe();
+    };
+  }, [form, setResumeData]);
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
