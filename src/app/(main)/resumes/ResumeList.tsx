@@ -253,53 +253,6 @@ export default function ResumeList({ initialResumes, totalCount, canCreate = fal
         }] as ResumeGroupDisplay[];
     }
   }, [filteredAndSortedResumes, groupOption, customGroups, resumes]);
-
-  // Initialize with empty expanded groups
-  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
-  
-  // Load expanded groups from localStorage on client-side only
-  useEffect(() => {
-    try {
-      const savedExpandedGroups = localStorage.getItem('resumeExpandedGroups');
-      if (savedExpandedGroups) {
-        setExpandedGroups(JSON.parse(savedExpandedGroups));
-      } else {
-        // If no saved groups, expand all by default
-        setExpandedGroups(resumeGroups.map(group => group.id));
-      }
-    } catch (e) {
-      // If parsing fails, initialize with all groups expanded
-      setExpandedGroups(resumeGroups.map(group => group.id));
-    }
-  }, [resumeGroups]);
-  
-  // Save expanded groups state to localStorage
-  useEffect(() => {
-    if (expandedGroups.length > 0) {
-      localStorage.setItem('resumeExpandedGroups', JSON.stringify(expandedGroups));
-    }
-  }, [expandedGroups]);
-  
-  // Ensure all new groups are added to expandedGroups
-  useEffect(() => {
-    // Only add new groups, don't close already-closed groups
-    const newGroupIds = resumeGroups
-      .map(group => group.id)
-      .filter(id => !expandedGroups.includes(id));
-    
-    if (newGroupIds.length > 0) {
-      setExpandedGroups(prev => [...prev, ...newGroupIds]);
-    }
-  }, [resumeGroups, expandedGroups]);
-  
-  // Toggle group expansion
-  const toggleGroup = (groupId: string) => {
-    setExpandedGroups(prev => 
-      prev.includes(groupId) 
-        ? prev.filter(id => id !== groupId)
-        : [...prev, groupId]
-    );
-  };
   
   // Handle creating a new custom group
   const handleCreateGroup = (group: ResumeGroup) => {
@@ -613,11 +566,9 @@ export default function ResumeList({ initialResumes, totalCount, canCreate = fal
           {resumeGroups.map(group => (
             <Collapsible
               key={group.id}
-              open={expandedGroups.includes(group.id)}
-              onOpenChange={() => toggleGroup(group.id)}
-              className="bg-card rounded-lg shadow-sm overflow-hidden"
+              className="bg-card rounded-lg shadow-sm overflow-hidden group"
             >
-              <CollapsibleTrigger className="flex w-full items-center justify-between border-b border-border p-3 hover:bg-muted/50">
+              <CollapsibleTrigger className="flex w-full items-center justify-between border-b border-border p-3 hover:bg-muted/50 cursor-pointer">
                 <div className="flex items-center gap-2">
                   <FolderPlus className="h-4 w-4 text-primary" />
                   <h3 className="font-medium text-sm">
@@ -670,10 +621,7 @@ export default function ResumeList({ initialResumes, totalCount, canCreate = fal
                       </TooltipProvider>
                     </>
                   )}
-                  {expandedGroups.includes(group.id) ? 
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" /> : 
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  }
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </div>
               </CollapsibleTrigger>
               

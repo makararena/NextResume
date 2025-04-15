@@ -142,11 +142,51 @@ export default function AIResumeUploader() {
     try {
       console.log("Submitting CV file:", cvFile.name, cvFile.type, cvFile.size);
       
+      // STEP 1: Parse the CV file
+      const formData = new FormData();
+      formData.append("file", cvFile);
+      
+      const parseResponse = await fetch("/api/parse-cv", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!parseResponse.ok) {
+        const errorData = await parseResponse.json();
+        throw new Error(errorData.error || "Failed to parse CV file");
+      }
+      
+      const { parsedText } = await parseResponse.json();
+      
+      if (!parsedText) {
+        throw new Error("Failed to extract text from CV");
+      }
+      
+      // STEP 2: Generate resume using the parsed text
+      const generateResponse = await fetch("/api/generate-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          parsedText,
+          jobDescription,
+          additionalInfo
+        }),
+      });
+      
+      if (!generateResponse.ok) {
+        const errorData = await generateResponse.json();
+        throw new Error(errorData.error || "Failed to generate resume");
+      }
+      
+      const { result } = await generateResponse.json();
+      
+      // The rest of the function stays the same - use server action to save the resume
       const resumeId = await generateAIResume(
         cvFile, 
         jobDescription, 
         additionalInfo,
-        photo
+        photo,
+        result // Pass the generated resume data as an additional parameter
       );
 
       // Set the ID first

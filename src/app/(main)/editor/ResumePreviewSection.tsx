@@ -25,32 +25,65 @@ export default function ResumePreviewSection({
   
   const [isReady, setIsReady] = useState(false);
   const [containerHeight, setContainerHeight] = useState(700);
+  const [scale, setScale] = useState(0.5);
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Calculate available height for the container
+  // Calculate available height and determine if mobile
   useEffect(() => {
     console.log("⚡ ResumePreviewSection height calculation effect running");
     console.time("⏱️ Height calculation");
     
-    const calculateHeight = () => {
+    const calculateDimensions = () => {
+      // Check if mobile view
+      const isMobileView = window.innerWidth < 768;
+      setIsMobile(isMobileView);
+      
       // Get viewport height and subtract header/footer + margins
       const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
       const topOffset = containerRef.current?.getBoundingClientRect().top || 0;
-      const bottomMargin = 80; // Space for footer and bottom margins
+      const bottomMargin = isMobileView ? 100 : 80; // More space for mobile footer
       
       // Calculate available height
       const availableHeight = viewportHeight - topOffset - bottomMargin;
-      setContainerHeight(Math.max(500, availableHeight)); // Minimum 500px height
-      console.log("📏 Container height calculated:", Math.max(500, availableHeight));
+      setContainerHeight(Math.max(400, availableHeight)); // Minimum 400px height
+      
+      // Calculate appropriate scale based on device width
+      const containerWidth = containerRef.current?.clientWidth || 800;
+      // A4 width is typically around 794px at 100% scale
+      const resumeWidth = 794;
+      const resumeHeight = resumeWidth * A4_ASPECT_RATIO;
+      
+      // Calculate scale
+      let newScale = 0.5; // Default scale
+      
+      if (isMobileView) {
+        // For mobile, scale to fit width with a bit of padding
+        newScale = (containerWidth - 32) / resumeWidth;
+      } else {
+        // For desktop, use a more appropriate scale
+        newScale = Math.min(
+          (containerWidth - 32) / resumeWidth,
+          availableHeight / resumeHeight
+        );
+      }
+      
+      // Limit scale to reasonable values
+      newScale = Math.max(0.25, Math.min(newScale, 0.9));
+      setScale(newScale);
+      
+      console.log("📏 Container height calculated:", Math.max(400, availableHeight));
+      console.log("📏 Scale calculated:", newScale);
     };
     
-    calculateHeight();
-    window.addEventListener('resize', calculateHeight);
+    calculateDimensions();
+    window.addEventListener('resize', calculateDimensions);
     
     console.timeEnd("⏱️ Height calculation");
     
     return () => {
-      window.removeEventListener('resize', calculateHeight);
+      window.removeEventListener('resize', calculateDimensions);
     };
   }, []);
   
@@ -88,12 +121,16 @@ export default function ResumePreviewSection({
         </div>
       )}
       <div 
-        className="flex w-full justify-center overflow-y-auto bg-muted rounded-lg p-4 print:h-auto print:overflow-visible print:bg-white print:p-0 print:rounded-none"
+        className="flex w-full justify-center overflow-y-auto bg-muted rounded-lg p-2 sm:p-4 print:h-auto print:overflow-visible print:bg-white print:p-0 print:rounded-none"
         style={{ height: `${containerHeight}px` }}
       >
         {isReady && (
           <div className="resume-preview-container w-full max-w-3xl flex justify-center items-start overflow-visible print:max-w-none print:shadow-none print:w-full print:h-full print:scale-100">
-            <div style={{ transform: 'scale(0.5)', transformOrigin: 'top center' }}>
+            <div style={{ 
+              transform: `scale(${scale})`, 
+              transformOrigin: 'top center',
+              transition: 'transform 0.2s ease-in-out'
+            }}>
               {console.time("⏱️ ResumePreview component render")}
               <ResumePreview
                 resumeData={resumeData}

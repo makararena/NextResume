@@ -20,7 +20,8 @@ export async function generateAIResume(
   cvFile: File,
   jobDescription: string,
   additionalInfo?: string,
-  photo?: File | null
+  photo?: File | null,
+  resumeJson?: string // New parameter for pre-generated resume data
 ): Promise<string> {
   const { userId } = await auth();
   if (!userId) {
@@ -49,37 +50,44 @@ export async function generateAIResume(
       console.log("Photo uploaded to:", photoUrl);
     }
 
-    const mimeType = cvFile.type;
-    const openai = new OpenAIClient();
+    // Get the resume data either from the provided JSON or generate it
+    let resumeJsonResponse: string;
+    let extractedCvContent: string = "";
 
-    let extractedCvContent: string;
-
-    if (mimeType === "application/pdf") {
-      console.log("Extracting text from PDF...");
-      extractedCvContent = await extractTextFromPdf(cvFile);
-      console.log("Text extraction complete.");
-
-    } else if (mimeType === "image/png" || mimeType === "image/jpeg") {
-      console.log("Processing image via OpenAI Vision...");
-      const base64Image = await fileToBase64(cvFile);
-
-      // Ask OpenAI to extract text from the image directly
-      extractedCvContent = await openai.analyzeImage(base64Image, jobDescription, additionalInfo);
-      console.log("Image text extraction complete.");
-
+    if (resumeJson) {
+      // Use the pre-generated resume JSON from the API
+      console.log("Using pre-generated resume data");
+      resumeJsonResponse = resumeJson;
     } else {
-      throw new Error("Unsupported file type. Please upload PDF, PNG, or JPEG.");
+      // Original flow - extract content and generate resume
+      const mimeType = cvFile.type;
+      const openai = new OpenAIClient();
+
+      if (mimeType === "application/pdf") {
+        console.log("Extracting text from PDF...");
+        extractedCvContent = await extractTextFromPdf(cvFile);
+        console.log("Text extraction complete.");
+      } else if (mimeType === "image/png" || mimeType === "image/jpeg") {
+        console.log("Processing image via OpenAI Vision...");
+        const base64Image = await fileToBase64(cvFile);
+
+        // Ask OpenAI to extract text from the image directly
+        extractedCvContent = await openai.analyzeImage(base64Image, jobDescription, additionalInfo);
+        console.log("Image text extraction complete.");
+      } else {
+        throw new Error("Unsupported file type. Please upload PDF, PNG, or JPEG.");
+      }
+
+      // Generate resume data using OpenAI
+      console.log("Generating tailored resume...");
+      resumeJsonResponse = await openai.generateResumeFromVisionAnalysis(
+        extractedCvContent,
+        jobDescription,
+        additionalInfo
+      );
     }
 
-    // 2. Generate resume data using OpenAI
-    console.log("Generating tailored resume...");
-    const resumeJsonResponse = await openai.generateResumeFromVisionAnalysis(
-      extractedCvContent,
-      jobDescription,
-      additionalInfo
-    );
-
-    // 3. Parse the JSON response from OpenAI
+    // Parse the JSON response from OpenAI
     let resumeData: ResumeValues;
     try {
       resumeData = JSON.parse(resumeJsonResponse);
@@ -102,7 +110,7 @@ export async function generateAIResume(
       }
     }
 
-    // 4. Save the resume in the database
+    // Save the resume in the database
     const resume = await createResumeFromAI(
       userId,
       resumeData,

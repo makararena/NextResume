@@ -3,9 +3,13 @@ import { resumeDataInclude } from "@/lib/types";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import ResumeEditor from "./ResumeEditor";
+import { unstable_noStore as noStore } from 'next/cache';
+
+// This tells Next.js this is a dynamic route that should not be statically optimized
+export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  searchParams: Promise<{ resumeId?: string }>;
+  searchParams: { resumeId?: string };
 }
 
 export const metadata: Metadata = {
@@ -13,12 +17,15 @@ export const metadata: Metadata = {
 };
 
 export default async function Page({ searchParams }: PageProps) {
+  // Prevent this page from being cached
+  noStore();
+  
   console.log("=== Page component start ===");
   console.time("⏱️ Page component total render time");
 
   try {
     console.time("⏱️ Search params resolution");
-    const { resumeId } = await searchParams;
+    const { resumeId } = searchParams;
     console.timeEnd("⏱️ Search params resolution");
     console.log("Search params resolved:", { resumeId });
 

@@ -7,13 +7,12 @@ import { ResumeValues } from "@/lib/validation";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import Breadcrumbs from "./Breadcrumbs";
-import Footer from "./Footer";
 import ResumePreviewSection from "./ResumePreviewSection";
 import { steps } from "./steps";
 import useAutoSaveResume from "./useAutoSaveResume";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ArrowRight, FileText, Printer, Layout, Save, Check, Loader, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Printer, Layout, Save, Check, Loader, ChevronRight, PenLineIcon } from "lucide-react";
 import Link from "next/link";
 import ColorPicker from "./ColorPicker";
 import CoverLetterGenerator from "./CoverLetterGenerator";
@@ -87,6 +86,8 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
 
   const [showSmResumePreview, setShowSmResumePreview] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState(resumeData.template || "classic");
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Preparing your resume...");
 
   useEffect(() => {
     console.log("🎨 Active template:", activeTemplate);
@@ -102,14 +103,36 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
     }
   }, [resumeToEdit, resumeData.photoUrl]);
 
+  // Page loading effect
+  useEffect(() => {
+    // Show loading state initially
+    setIsLoading(true);
+    setLoadingMessage("Preparing your resume...");
+    
+    // Hide loading state after a short delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   const currentStep = searchParams.get("step") || steps[0].key;
   console.log("🚶‍♂️ Current step:", currentStep);
 
   function setStep(key: string) {
     console.log("🔄 Step changed:", key);
+    // Show loading animation when changing steps
+    setIsLoading(true);
+    setLoadingMessage("Updating your resume...");
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set("step", key);
     window.history.pushState(null, "", `?${newSearchParams.toString()}`);
+    
+    // Hide loading after a short delay
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 400); // Shorter delay for step changes
   }
 
   const FormComponent = steps.find(
@@ -122,30 +145,64 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
     { id: "minimalist", name: "Minimalist", icon: <Layout className="h-4 w-4" /> }
   ];
 
+  // Add loading when template changes
   const handleTemplateChange = (templateId: string) => {
     console.log("🎨 Template changed to:", templateId);
+    setIsLoading(true); // Show loading animation
+    setLoadingMessage("Applying template...");
     setActiveTemplate(templateId);
     setResumeData(prevData => ({ ...prevData, template: templateId }));
+    
+    // Hide loading after template change is processed
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 600);
   };
 
+  // Enhanced loading management for AI dialogs
+  useEffect(() => {
+    // Add event listeners for dialog openings
+    const handleDialogOpen = () => {
+      setIsLoading(true);
+      setLoadingMessage("Preparing AI assistant...");
+      // Hide loading after a reasonable delay
+      setTimeout(() => setIsLoading(false), 800);
+    };
+    
+    // Listen for dialog open events from AI components
+    document.addEventListener('ai-dialog-open', handleDialogOpen);
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('ai-dialog-open', handleDialogOpen);
+    };
+  }, []);
+
+  // Enhance handlePrint with loading animation
   const handlePrint = () => {
     console.log("🖨️ Print triggered");
+    setIsLoading(true); // Show loading animation
+    setLoadingMessage("Preparing to print...");
     logMemoryUsage("before-print");
+    
     const container = document.querySelector('.resume-preview-container');
     if (!container) {
       console.error('❌ Could not find resume content container');
+      setIsLoading(false);
       return;
     }
 
     const content = container.querySelector('div > div > div');
     if (!content) {
       console.error('❌ Could not find resume content element');
+      setIsLoading(false);
       return;
     }
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       alert('Please allow popups for this site to print your resume.');
+      setIsLoading(false);
       return;
     }
 
@@ -192,6 +249,7 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
       </html>
     `);
     printWindow.document.close();
+    setIsLoading(false); // Hide loading animation
     logMemoryUsage("after-print");
   };
 
@@ -208,6 +266,21 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
 
   return (
     <div className="flex grow flex-col min-h-screen bg-background">
+      {/* Loading overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <div className="relative w-16 h-16">
+              <div className="w-16 h-16 rounded-full border-4 border-primary/30 border-t-primary animate-spin"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <Layout className="h-6 w-6 text-primary animate-pulse" />
+              </div>
+            </div>
+            <p className="mt-4 text-muted-foreground animate-pulse">{loadingMessage}</p>
+          </div>
+        </div>
+      )}
+      
       <div className="bg-card border-b border-border px-3 py-3 sticky top-0 z-20 print:hidden shadow-sm">
         <div className="max-w-screen-xl mx-auto">
           {/* Top navigation row */}
@@ -222,24 +295,28 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
                 {isSaving && (
                   <>
                     <Loader className="w-3.5 h-3.5 animate-spin" />
-                    <span>Saving...</span>
+                    <span className="text-xs sm:text-sm">Saving...</span>
                   </>
                 )}
                 {!isSaving && hasUnsavedChanges && (
                   <>
                     <Check className="w-3.5 h-3.5 text-green-500" />
-                    <span className="text-green-600">All changes saved</span>
+                    <span className="text-xs sm:text-sm text-green-600">All changes saved</span>
                   </>
                 )}
               </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* We've moved the Preview button below the step indicator for all screen sizes */}
             </div>
           </div>
           
           {/* Progress bar and step indicator */}
           <div className="mb-4">
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-sm font-medium">Step {currentStepIndex + 1} of {steps.length}: {steps[currentStepIndex]?.title}</p>
-              <span className="text-sm text-muted-foreground">{progressPercentage}% Complete</span>
+              <p className="text-xs sm:text-sm font-medium">Step {currentStepIndex + 1} of {steps.length}: {steps[currentStepIndex]?.title}</p>
+              <span className="text-xs sm:text-sm text-muted-foreground">{progressPercentage}% Complete</span>
             </div>
             <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
               <div 
@@ -247,13 +324,13 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
                 style={{ width: `${progressPercentage}%` }}
               ></div>
             </div>
-          </div>
-          
-          {/* Steps and templates row */}
-          <div className="flex flex-col md:flex-row md:items-center gap-3">
-            <div className="flex items-center gap-3 md:mr-4">
+            
+            {/* Back button and Template selector under progress bar */}
+            <div className="mt-3 flex items-center justify-between">
+              {/* Back button */}
               <Button 
-                className="bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700"
+                className="bg-muted text-muted-foreground hover:bg-muted/70 border border-border"
+                variant="outline"
                 size="sm" 
                 asChild
               >
@@ -262,8 +339,87 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
                   Back
                 </Link>
               </Button>
+              
+              <div className="flex items-center gap-2">
+                {/* Choose Template button - only visible on mobile */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="md:hidden border border-border bg-muted text-muted-foreground hover:bg-muted/70"
+                  onClick={() => {
+                    // Create a fullscreen modal for mobile template selection
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 bg-background z-50 flex flex-col overflow-hidden';
+                    modal.innerHTML = `
+                      <div class="bg-card p-4 border-b border-border">
+                        <div class="flex justify-between items-center">
+                          <h3 class="font-medium">Choose Template</h3>
+                          <button class="text-muted-foreground text-lg">&times;</button>
+                        </div>
+                      </div>
+                      <div class="flex-1 overflow-auto p-4">
+                        ${templates.map(template => `
+                          <button class="w-full text-left p-4 mb-2 rounded-md flex items-center ${
+                            activeTemplate === template.id 
+                              ? 'bg-primary/10 text-primary border border-primary/20' 
+                              : 'hover:bg-muted border border-border'
+                          }">
+                            <span class="mr-3">
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect width="18" height="18" x="3" y="3" rx="2" />
+                                <path d="M3 9h18" />
+                                <path d="M9 21V9" />
+                              </svg>
+                            </span>
+                            <span class="text-base">${template.name}</span>
+                            ${activeTemplate === template.id ? '<span class="ml-auto text-primary">✓</span>' : ''}
+                          </button>
+                        `).join('')}
+                      </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                    
+                    // Set up event listeners
+                    const closeBtn = modal.querySelector('div > div > button');
+                    closeBtn?.addEventListener('click', () => {
+                      document.body.removeChild(modal);
+                    });
+                    
+                    // Template selection buttons
+                    const templateBtns = modal.querySelectorAll('div:nth-child(2) > button');
+                    templateBtns.forEach((btn, index) => {
+                      btn.addEventListener('click', () => {
+                        handleTemplateChange(templates[index].id);
+                        document.body.removeChild(modal);
+                      });
+                    });
+                  }}
+                >
+                  <Layout className="mr-1.5 h-4 w-4" />
+                  Templates
+                </Button>
+
+                {/* Preview button - only visible on mobile */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowSmResumePreview(!showSmResumePreview)}
+                  className="text-xs border border-border bg-muted text-muted-foreground hover:bg-muted/70 md:hidden"
+                >
+                  {showSmResumePreview ? "Edit" : "Preview"}
+                  {showSmResumePreview ? <PenLineIcon className="ml-1.5 h-4 w-4" /> : <FileText className="ml-1.5 h-4 w-4" />}
+                </Button>
+              </div>
             </div>
-            <div className="overflow-x-auto no-scrollbar flex-1">
+          </div>
+          
+          {/* Mobile navigation and template selection */}
+          {/* We've moved the mobile navigation functionality to the top nav area */}
+          
+          {/* Steps navigation with template buttons aligned */}
+          <div className="overflow-x-auto no-scrollbar pb-1 hidden md:block">
+            <div className="flex items-center justify-between">
               <div className="flex items-center space-x-1">
                 {steps.map((step, index) => {
                   const isCompleted = index < currentStepIndex;
@@ -272,20 +428,20 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
                   return (
                     <div key={step.key} className="flex items-center">
                       {index > 0 && (
-                        <ChevronRight className="h-3 w-3 mx-1 text-muted-foreground" />
+                        <ChevronRight className="h-3 w-3 mx-1 text-muted-foreground flex-shrink-0" />
                       )}
                       <button
                         onClick={() => setStep(step.key)}
                         disabled={index > currentStepIndex}
                         className={cn(
-                          "px-2.5 py-1.5 rounded-md text-sm transition-colors flex items-center",
+                          "px-2 py-1 rounded-md text-xs sm:text-sm transition-colors flex items-center whitespace-nowrap",
                           isCurrent && "bg-primary text-primary-foreground font-medium",
                           isCompleted && "text-muted-foreground hover:bg-muted hover:text-foreground",
                           !isCompleted && !isCurrent && "text-muted-foreground/50 cursor-not-allowed"
                         )}
                       >
                         {isCompleted && (
-                          <Check className="h-3.5 w-3.5 mr-1.5 text-green-500" />
+                          <Check className="h-3 w-3 mr-1 text-green-500" />
                         )}
                         {step.title}
                       </button>
@@ -293,23 +449,30 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
                   );
                 })}
               </div>
+              
+              {/* Template selection buttons - aligned with steps */}
+              <div className="flex items-center gap-2 bg-muted p-1 rounded-md">
+                {templates.map((template) => (
+                  <button
+                    key={template.id}
+                    onClick={() => handleTemplateChange(template.id)}
+                    className={`flex items-center px-2.5 py-1.5 rounded text-xs sm:text-sm ${
+                      activeTemplate === template.id 
+                        ? "bg-card shadow-sm font-medium" 
+                        : "text-muted-foreground hover:bg-secondary"
+                    }`}
+                  >
+                    {template.icon}
+                    <span className="ml-1.5">{template.name}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-3 bg-muted p-1 rounded-md self-start md:self-auto">
-              {templates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => handleTemplateChange(template.id)}
-                  className={`flex items-center px-3 py-1.5 rounded text-sm ${
-                    activeTemplate === template.id 
-                      ? "bg-card shadow-sm" 
-                      : "text-muted-foreground hover:bg-secondary"
-                  }`}
-                >
-                  {template.icon}
-                  <span className="ml-1.5">{template.name}</span>
-                </button>
-              ))}
-            </div>
+          </div>
+          
+          {/* Template selection buttons - only visible on desktop */}
+          <div className="mt-3 hidden md:flex justify-end">
+            {/* We've moved the template buttons to the top navigation bar */}
           </div>
         </div>
       </div>
@@ -317,13 +480,17 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
       <main className="flex-1 p-3 md:p-6 print:p-0">
         <div className="max-w-screen-xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:block">
-            <div className="w-full space-y-6 bg-card border border-border rounded-lg shadow-sm p-6 print:hidden">
+            <div className={cn(
+              "w-full space-y-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6 print:hidden",
+              showSmResumePreview ? "hidden md:block" : "block"
+            )}>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">{steps[currentStepIndex]?.title}</h2>
-                <Badge variant="outline" className="text-muted-foreground bg-muted">
+                <h2 className="text-lg sm:text-xl font-semibold">{steps[currentStepIndex]?.title}</h2>
+                <Badge variant="outline" className="text-xs text-muted-foreground bg-muted">
                   {activeTemplate.charAt(0).toUpperCase() + activeTemplate.slice(1)} Template
                 </Badge>
               </div>
+              
               {FormComponent && (
                 <FormComponent
                   resumeData={resumeData}
@@ -332,52 +499,89 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
               )}
                
               {/* Navigation buttons at the bottom of the form */}
-              <div className="flex justify-between mt-8 pt-4 border-t border-border sticky bottom-0 bg-card p-4 -mx-6 -mb-6 rounded-b-lg">
+              <div className="flex justify-between mt-8 pt-4 border-t border-border sticky bottom-0 bg-card p-4 -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 rounded-b-lg">
                 <Button
                   variant="outline"
-                  size="lg"
+                  size="sm"
                   onClick={
                     previousStep ? () => setStep(previousStep) : undefined
                   }
                   disabled={!previousStep}
-                  className="px-5"
+                  className="px-3 sm:px-5"
                 >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Previous
+                  <ArrowLeft className="mr-1 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                  <span className="text-xs sm:text-sm">Previous</span>
                 </Button>
                 <Button
-                  size="lg"
+                  size="sm"
                   onClick={nextStep ? () => setStep(nextStep) : undefined}
                   disabled={!nextStep}
-                  className="px-6 bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="px-3 sm:px-6 bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  Next
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <span className="text-xs sm:text-sm">Next</span>
+                  <ArrowRight className="ml-1 sm:ml-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
                 </Button>
               </div>
             </div>
 
             <div className={cn(
-              "w-full bg-card border border-border rounded-lg shadow-sm p-6 print:shadow-none print:border-none print:p-0",
+              "w-full bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6 print:shadow-none print:border-none print:p-0",
               showSmResumePreview ? "block" : "hidden lg:block"
             )}>
-              <div className="flex items-center justify-between mb-4 print:hidden">
-                <h2 className="text-lg font-medium">Preview</h2>
-                <div className="flex items-center gap-2">
-                  <HRMessageGenerator resumeId={resumeToEdit?.id || ""} />
-                  <CoverLetterGenerator resumeId={resumeToEdit?.id || ""} />
-                  <ColorPicker
-                    color={resumeData.colorHex}
-                    onChange={(color) =>
-                      setResumeData(prevData => ({
-                        ...prevData,
-                        colorHex: color.hex
-                      }))
-                    }
-                  />
-                  <Button variant="outline" size="icon" onClick={handlePrint} title="Print Resume">
-                    <Printer className="size-5" />
-                  </Button>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 print:hidden gap-3">
+                <h2 className="text-lg font-medium">Resume Preview</h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex flex-wrap items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs" 
+                      onClick={handlePrint} 
+                      title="Print Resume"
+                    >
+                      <Printer className="mr-1.5 h-3.5 w-3.5" />
+                      Print
+                    </Button>
+                    
+                    <ColorPicker
+                      color={resumeData.colorHex}
+                      onChange={(color) =>
+                        setResumeData(prevData => ({
+                          ...prevData,
+                          colorHex: color.hex
+                        }))
+                      }
+                      size="sm"
+                    />
+                  </div>
+                  
+                  <div className="inline-flex flex-wrap items-center gap-2">
+                    {/* Enhanced AI components with custom events */}
+                    <div 
+                      onClick={() => {
+                        // Show loading when clicking the HR Message button
+                        setIsLoading(true);
+                        // Create and dispatch a custom event when dialog opens
+                        document.dispatchEvent(new CustomEvent('ai-dialog-open'));
+                      }}
+                    >
+                      <HRMessageGenerator 
+                        resumeId={resumeToEdit?.id || ""} 
+                      />
+                    </div>
+                    <div 
+                      onClick={() => {
+                        // Show loading when clicking the Cover Letter button
+                        setIsLoading(true);
+                        // Create and dispatch a custom event when dialog opens
+                        document.dispatchEvent(new CustomEvent('ai-dialog-open'));
+                      }}
+                    >
+                      <CoverLetterGenerator 
+                        resumeId={resumeToEdit?.id || ""} 
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               <ResumePreviewSection
@@ -389,12 +593,6 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
           </div>
         </div>
       </main>
-
-      <Footer
-        showSmResumePreview={showSmResumePreview}
-        setShowSmResumePreview={setShowSmResumePreview}
-        className="print:hidden"
-      />
     </div>
   );
 }

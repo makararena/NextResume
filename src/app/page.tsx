@@ -68,14 +68,14 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* Header */}
-      <header className="border-b border-border py-4 px-6 flex justify-between items-center bg-background">
+      <header className="border-b border-border py-4 px-4 sm:px-6 flex justify-between items-center bg-background sticky top-0 z-50">
         <div className="flex items-center">
-          <Link href="/" className="text-2xl font-bold tracking-tighter">
+          <Link href="/" className="text-xl sm:text-2xl font-bold tracking-tighter">
             <span className="text-foreground">Next</span>
             <span className="text-foreground">Resume</span>
           </Link>
         </div>
-        <nav className="flex items-center space-x-8">
+        <nav className="flex items-center space-x-4 sm:space-x-8">
           <ThemeToggle />
           {isSignedIn ? (
             <UserButton afterSignOutUrl="/" />
@@ -92,34 +92,34 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="flex-1 grid grid-cols-1 px-4 md:px-20 py-16 md:py-24">
-        <div className="flex flex-col justify-center space-y-10 max-w-4xl mx-auto w-full">
-          <div className="space-y-12 text-center">
+      <section className="flex-1 grid grid-cols-1 px-4 sm:px-6 md:px-20 py-12 sm:py-16 md:py-24">
+        <div className="flex flex-col justify-center space-y-8 sm:space-y-10 max-w-4xl mx-auto w-full">
+          <div className="space-y-8 sm:space-y-12 text-center">
             <div className="relative">
               {/* Static text that will be revealed */}
-              <h1 className="text-4xl md:text-6xl xl:text-7xl font-bold leading-tight tracking-tight opacity-0 select-none pointer-events-none invisible" aria-hidden="true">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl xl:text-7xl font-bold leading-tight tracking-tight opacity-0 select-none pointer-events-none invisible" aria-hidden="true">
                 {fullText}
               </h1>
               
               {/* Animated text with typed effect */}
-              <h1 className="text-4xl md:text-6xl xl:text-7xl font-bold leading-tight tracking-tight absolute top-0 left-0 right-0 text-center">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl xl:text-7xl font-bold leading-tight tracking-tight absolute top-0 left-0 right-0 text-center">
                 {fullText.substring(0, charCount)}
                 <span 
                   className={`inline-block ${showCursor ? 'opacity-100' : 'opacity-0'} transition-opacity duration-100`}
                 >|</span>
               </h1>
             </div>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto px-4">
               Break through the bots. Get past the algorithms. Land the interviews you deserve.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="group" asChild>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
+            <Button size="lg" className="group w-full sm:w-auto" asChild>
               <Link href={isSignedIn ? "/resumes" : "/sign-in"}>
                 Optimize My Resume <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="group" asChild>
+            <Button size="lg" variant="outline" className="group w-full sm:w-auto" asChild>
               <a href="#how-it-works" onClick={handleSmoothScroll}>
                 <Play className="mr-2 h-4 w-4" /> See how it works
               </a>
@@ -127,174 +127,167 @@ export default function Home() {
           </div>
 
           {/* Feature highlights */}
-          <div className="space-y-7 pt-6 max-w-2xl mx-auto">
+          <div className="space-y-6 sm:space-y-7 pt-6 max-w-2xl mx-auto px-4">
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-2 rounded-full">
-                <Target className="h-6 w-6 text-primary" strokeWidth={2.5} />
+                <Target className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-lg text-muted-foreground">ATS-busting keyword optimization</p>
+              <p className="text-base sm:text-lg text-muted-foreground">ATS-busting keyword optimization</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-2 rounded-full">
-                <LayoutTemplate className="h-6 w-6 text-primary" strokeWidth={2.5} />
+                <LayoutTemplate className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-lg text-muted-foreground">Templates proven to increase pass rates by 70%</p>
+              <p className="text-base sm:text-lg text-muted-foreground">Templates proven to increase pass rates by 70%</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-2 rounded-full">
-                <Search className="h-6 w-6 text-primary" strokeWidth={2.5} />
+                <Search className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-lg text-muted-foreground">Professional formatting that recruiters notice</p>
+              <p className="text-base sm:text-lg text-muted-foreground">Professional formatting that recruiters notice</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-2 rounded-full">
-                <FileText className="h-6 w-6 text-primary" strokeWidth={2.5} />
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-lg text-muted-foreground">Create resumes from scratch or optimize existing ones</p>
+              <p className="text-base sm:text-lg text-muted-foreground">Create resumes from scratch or optimize existing ones</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-2 rounded-full">
-                <Edit className="h-6 w-6 text-primary" strokeWidth={2.5} />
+                <Edit className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-lg text-muted-foreground">Full editing control of AI-generated resumes</p>
+              <p className="text-base sm:text-lg text-muted-foreground">Full editing control of AI-generated resumes</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Problem → Solution Section */}
-      <section className="py-20 px-6 bg-muted/30">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
             <div className="space-y-6 h-full flex flex-col">
               <div className="flex items-center gap-3">
-                <XCircle className="h-8 w-8 text-destructive" />
-                <h2 className="text-2xl font-bold">Why You're Losing Opportunities</h2>
+                <XCircle className="h-6 w-6 sm:h-8 sm:w-8 text-destructive" />
+                <h2 className="text-xl sm:text-2xl font-bold">Why You're Losing Opportunities</h2>
               </div>
               <ul className="space-y-4 flex-grow">
                 <li className="flex gap-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-1" />
-                  <p>Companies are using AI-driven filters and ATS systems to screen candidates.</p>
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base">Companies are using AI-driven filters and ATS systems to screen candidates.</p>
                 </li>
                 <li className="flex gap-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-1" />
-                  <p>98% of resumes are rejected before a human ever sees them.</p>
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base">98% of resumes are rejected before a human ever sees them.</p>
                 </li>
                 <li className="flex gap-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-1" />
-                  <p>Manual tailoring is exhausting, frustrating, and rarely works at scale.</p>
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base">Manual tailoring is exhausting, frustrating, and rarely works at scale.</p>
                 </li>
                 <li className="flex gap-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive flex-shrink-0 mt-1" />
-                  <p>You're not failing the interview — you're failing to reach it.</p>
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base">You're not failing the interview — you're failing to reach it.</p>
                 </li>
               </ul>
-              <div className="mt-auto space-y-2">
-                <p className="font-semibold text-lg"></p>
-                <p></p>
-              </div>
             </div>
             
             <div className="space-y-6 h-full flex flex-col">
               <div className="flex items-center gap-3">
-                <CheckCircle className="h-8 w-8 text-green-500" />
-                <h2 className="text-2xl font-bold text-foreground">Outsmart the System. Get Hired.</h2>
+                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground">Outsmart the System. Get Hired.</h2>
               </div>
               <ul className="space-y-4 flex-grow">
                 <li className="flex gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-foreground">AI-powered resume tailoring, fully based on your target job description</p>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base text-foreground">AI-powered resume tailoring, fully based on your target job description</p>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-foreground">Instant keyword mapping to match ATS filters perfectly</p>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base text-foreground">Instant keyword mapping to match ATS filters perfectly</p>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-foreground">Clean, professional formatting to grab recruiter attention</p>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base text-foreground">Clean, professional formatting to grab recruiter attention</p>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-foreground">Speed: Get your optimized resume in under 10 seconds</p>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base text-foreground">Speed: Get your optimized resume in under 10 seconds</p>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-foreground">Fully editable output, so you stay in control</p>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base text-foreground">Fully editable output, so you stay in control</p>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-foreground">Create brand new resumes from scratch with our intuitive editor</p>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base text-foreground">Create brand new resumes from scratch with our intuitive editor</p>
                 </li>
                 <li className="flex gap-2">
-                  <Check className="h-5 w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-foreground">Full flexibility to modify AI-generated content to your preference</p>
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
+                  <p className="text-sm sm:text-base text-foreground">Full flexibility to modify AI-generated content to your preference</p>
                 </li>
               </ul>
-              <div className="mt-auto">
-                <p></p>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 px-6 bg-muted/20">
+      <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 bg-muted/20">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-2">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2">
               How It Works
             </h2>
             <p className="text-muted-foreground mt-2">Optimize an existing resume or create one from scratch - you have options</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-card p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up">
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                <Upload className="h-8 w-8 text-primary" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+            <div className="bg-card p-6 sm:p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Step 1: Upload your current resume</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Step 1: Upload your current resume</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 No need to start from scratch, or choose our editor to build one from the ground up.
               </p>
             </div>
 
             <div
-              className="bg-card p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
+              className="bg-card p-6 sm:p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
               style={{ animationDelay: "0.2s" }}
             >
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                <FileText className="h-8 w-8 text-primary" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-2">Step 2: Paste your target job description</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Step 2: Paste your target job description</h3>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 We'll map the critical keywords and align your experiences.
               </p>
             </div>
 
             <div
-              className="bg-card p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
+              className="bg-card p-6 sm:p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
               style={{ animationDelay: "0.4s" }}
             >
-              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                <Zap className="h-8 w-8 text-primary" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h3 className="text-xl font-bold mb-2">
+              <h3 className="text-lg sm:text-xl font-bold mb-2">
                 Step 3: Get your optimized resume in 10 seconds
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 ATS-friendly, recruiter-ready, and fully editable.
               </p>
             </div>
           </div>
 
           <div className="text-center mt-8 flex items-center justify-center">
-            <Clock className="h-5 w-5 text-primary mr-2" />
-            <p className="text-muted-foreground">Average delivery time: under 10 seconds</p>
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary mr-2" />
+            <p className="text-sm sm:text-base text-muted-foreground">Average delivery time: under 10 seconds</p>
           </div>
 
-          <div className="text-center mt-12">
-            <Button asChild>
+          <div className="text-center mt-10 sm:mt-12">
+            <Button asChild className="w-full sm:w-auto">
               <Link href={isSignedIn ? "/resumes" : "/sign-in"}>
                 Start Optimizing Now <ArrowRight className="ml-2" />
               </Link>
@@ -304,80 +297,80 @@ export default function Home() {
       </section>
 
       {/* Success Metrics Section */}
-      <section className="py-16 px-6 bg-background">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-background">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">Proof It Works</h2>
+          <div className="text-center mb-8 sm:mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3">Proof It Works</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-card p-8 rounded-lg border border-border text-center">
-              <div className="text-5xl font-bold mb-2">5,000+</div>
-              <p className="text-muted-foreground">Resumes optimized</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-8">
+            <div className="bg-card p-6 sm:p-8 rounded-lg border border-border text-center">
+              <div className="text-4xl sm:text-5xl font-bold mb-2">5,000+</div>
+              <p className="text-sm sm:text-base text-muted-foreground">Resumes optimized</p>
             </div>
             
-            <div className="bg-card p-8 rounded-lg border border-border text-center">
-              <div className="text-5xl font-bold mb-2">78%</div>
-              <p className="text-muted-foreground">Average interview success rate</p>
+            <div className="bg-card p-6 sm:p-8 rounded-lg border border-border text-center">
+              <div className="text-4xl sm:text-5xl font-bold mb-2">78%</div>
+              <p className="text-sm sm:text-base text-muted-foreground">Average interview success rate</p>
             </div>
             
-            <div className="bg-card p-8 rounded-lg border border-border text-center">
-              <div className="text-5xl font-bold mb-2">100+</div>
-              <p className="text-muted-foreground">Industries supported</p>
+            <div className="bg-card p-6 sm:p-8 rounded-lg border border-border text-center">
+              <div className="text-4xl sm:text-5xl font-bold mb-2">100+</div>
+              <p className="text-sm sm:text-base text-muted-foreground">Industries supported</p>
             </div>
           </div>
           
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <p className="italic mb-3">"I got 3 interviews in my first week after using NextResume!"</p>
-              <p className="text-sm text-muted-foreground">— Michael R., Product Manager</p>
+          <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
+              <p className="text-sm sm:text-base italic mb-3">"I got 3 interviews in my first week after using NextResume!"</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">— Michael R., Product Manager</p>
             </div>
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <p className="italic mb-3">"My response rate jumped from 10% to 70%. The ROI is undeniable."</p>
-              <p className="text-sm text-muted-foreground">— Sarah J., Data Scientist</p>
+            <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
+              <p className="text-sm sm:text-base italic mb-3">"My response rate jumped from 10% to 70%. The ROI is undeniable."</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">— Sarah J., Data Scientist</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 px-6">
+      <section className="py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-            <div className="space-y-8 flex flex-col">
-              <h2 className="text-3xl font-bold">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-stretch">
+            <div className="space-y-6 sm:space-y-8 flex flex-col">
+              <h2 className="text-2xl sm:text-3xl font-bold">
                 Proven results for professionals like you
               </h2>
 
-              <div className="p-6 bg-muted/30 rounded-lg border border-border flex-grow">
-                <p className="italic mb-4">
+              <div className="p-4 sm:p-6 bg-muted/30 rounded-lg border border-border flex-grow">
+                <p className="text-sm sm:text-base italic mb-4">
                   "Received responses from 70% of applications after using this
                   tool, compared to maybe 10% before. The ROI is incredible."
                 </p>
-                <p className="font-medium">— Alex T., Software Engineer</p>
+                <p className="text-sm sm:text-base font-medium">— Alex T., Software Engineer</p>
               </div>
 
-              <div className="p-6 bg-muted/30 rounded-lg border border-border flex-grow">
-                <p className="italic mb-4">
+              <div className="p-4 sm:p-6 bg-muted/30 rounded-lg border border-border flex-grow">
+                <p className="text-sm sm:text-base italic mb-4">
                   "I was applying to 5+ jobs daily with zero callbacks. This system
                   helped me land 3 interviews in my first week using optimized
                   resumes."
                 </p>
-                <p className="font-medium">— Jamie K., Marketing Specialist</p>
+                <p className="text-sm sm:text-base font-medium">— Jamie K., Marketing Specialist</p>
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center space-y-8 bg-muted/30 p-8 rounded-lg">
+            <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-8 bg-muted/30 p-6 sm:p-8 rounded-lg">
               <div className="text-center">
-                <div className="text-5xl font-bold mb-2">5,000+</div>
-                <p className="text-xl text-muted-foreground">
+                <div className="text-4xl sm:text-5xl font-bold mb-2">5,000+</div>
+                <p className="text-lg sm:text-xl text-muted-foreground">
                   Resumes optimized and counting
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="text-5xl font-bold mb-2">78%</div>
-                <p className="text-xl text-muted-foreground">
+                <div className="text-4xl sm:text-5xl font-bold mb-2">78%</div>
+                <p className="text-lg sm:text-xl text-muted-foreground">
                   Interview success rate
                 </p>
               </div>
@@ -387,46 +380,46 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-6 bg-muted/20">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 bg-muted/20">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold mb-10 text-center">Frequently Asked Questions</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-8 sm:mb-10 text-center">Frequently Asked Questions</h2>
           
-          <div className="space-y-6">
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <h3 className="text-xl font-semibold mb-2">How fast is the process?</h3>
-              <p>Less than 10 seconds from upload to final resume.</p>
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">How fast is the process?</h3>
+              <p className="text-sm sm:text-base">Less than 10 seconds from upload to final resume.</p>
             </div>
             
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <h3 className="text-xl font-semibold mb-2">Will it work for my industry?</h3>
-              <p>Yes. Our AI adapts to every industry and experience level.</p>
+            <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Will it work for my industry?</h3>
+              <p className="text-sm sm:text-base">Yes. Our AI adapts to every industry and experience level.</p>
             </div>
             
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <h3 className="text-xl font-semibold mb-2">Can I edit my resume after?</h3>
-              <p>Absolutely. You'll receive a fully editable version.</p>
+            <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Can I edit my resume after?</h3>
+              <p className="text-sm sm:text-base">Absolutely. You'll receive a fully editable version.</p>
             </div>
             
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <h3 className="text-xl font-semibold mb-2">Can I create a resume from scratch?</h3>
-              <p>Yes! You can either optimize an existing resume or create a brand new one from scratch using our editor.</p>
+            <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Can I create a resume from scratch?</h3>
+              <p className="text-sm sm:text-base">Yes! You can either optimize an existing resume or create a brand new one from scratch using our editor.</p>
             </div>
             
-            <div className="bg-card p-6 rounded-lg border border-border">
-              <h3 className="text-xl font-semibold mb-2">Can I modify the AI-generated resume?</h3>
-              <p>Of course. You have full control to edit any section of your AI-generated resume to make it perfect for your needs.</p>
+            <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">Can I modify the AI-generated resume?</h3>
+              <p className="text-sm sm:text-base">Of course. You have full control to edit any section of your AI-generated resume to make it perfect for your needs.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 px-6 bg-background">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-background">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Don't let automation decide your future.</h2>
-          <p className="text-xl mb-8">Upload your resume and job description now — let's get you in front of real people.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Don't let automation decide your future.</h2>
+          <p className="text-lg sm:text-xl mb-6 sm:mb-8">Upload your resume and job description now — let's get you in front of real people.</p>
           
-          <Button size="lg" className="mt-4" asChild>
+          <Button size="lg" className="w-full sm:w-auto mt-4" asChild>
             <Link href={isSignedIn ? "/resumes" : "/sign-in"}>
               Optimize My Resume <ArrowRight className="ml-2" />
             </Link>
@@ -435,26 +428,26 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-muted/30 py-8 px-6 border-t border-border">
+      <footer className="bg-muted/30 py-6 sm:py-8 px-4 sm:px-6 border-t border-border">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <Link href="/" className="text-xl font-bold">
+              <Link href="/" className="text-lg sm:text-xl font-bold">
                 <span className="text-foreground">Next</span>
                 <span className="text-foreground">Resume</span>
               </Link>
             </div>
 
-            <div className="flex space-x-8 mb-4 md:mb-0">
+            <div className="flex space-x-6 sm:space-x-8 mb-4 md:mb-0">
               <Link
                 href="/terms"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-sm sm:text-base text-muted-foreground hover:text-foreground"
               >
                 Terms
               </Link>
               <Link
                 href="/privacy"
-                className="text-muted-foreground hover:text-foreground"
+                className="text-sm sm:text-base text-muted-foreground hover:text-foreground"
               >
                 Privacy
               </Link>
@@ -468,7 +461,7 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"></path>
                 </svg>
               </a>
@@ -479,7 +472,7 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.96 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"></path>
                 </svg>
               </a>
@@ -490,16 +483,11 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                 </svg>
               </a>
             </div>
-          </div>
-
-          <div className="mt-8 pt-8 border-t border-border text-center text-muted-foreground text-sm">
-            <p>© {new Date().getFullYear()} NextResume. All rights reserved.</p>
-            <p className="mt-2">Proudly developed by <a href="https://www.naulichtis.online/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Naulichtis</a> - Building AI-powered SaaS solutions with top emerging talent.</p>
           </div>
         </div>
       </footer>
