@@ -192,9 +192,10 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
       return;
     }
 
-    const content = container.querySelector('div > div > div');
-    if (!content) {
-      console.error('❌ Could not find resume content element');
+    // Get the actual resume content directly
+    const resumePreview = container.querySelector('.bg-white');
+    if (!resumePreview) {
+      console.error('❌ Could not find resume preview element');
       setIsLoading(false);
       return;
     }
@@ -206,6 +207,19 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
       return;
     }
 
+    // Create a clone of the resume content for printing
+    const contentClone = resumePreview.cloneNode(true) as HTMLElement;
+    
+    // Reset any transforms or scales that might be applied
+    contentClone.style.transform = 'none';
+    contentClone.style.scale = '1';
+    contentClone.style.width = '210mm';
+    contentClone.style.height = '297mm';
+    contentClone.style.margin = '0';
+    contentClone.style.padding = '0';
+    contentClone.style.overflow = 'hidden';
+
+    // Get styles for printing
     const styleSheets = Array.from(document.styleSheets);
     let styles = '';
 
@@ -226,7 +240,45 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
       console.error('❌ Error accessing stylesheets:', e);
     }
 
-    const contentClone = content.cloneNode(true) as HTMLElement;
+    // Add specific print styles for A4 format with no padding or margins
+    const printStyles = `
+      @page {
+        size: A4;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background: white;
+        overflow: hidden;
+      }
+      .print-container {
+        width: 210mm;
+        height: 297mm;
+        margin: 0 auto;
+        padding: 0;
+        overflow: hidden;
+        page-break-after: avoid;
+        page-break-before: avoid;
+        page-break-inside: avoid;
+        position: relative;
+        box-sizing: border-box;
+      }
+      .print-container > div {
+        transform: none !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        max-height: 297mm !important;
+        box-sizing: border-box;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        background-color: white;
+      }
+    `;
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -234,6 +286,8 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
         <head>
           <title>Print Resume - ${resumeData.firstName || ''} ${resumeData.lastName || ''}</title>
           <style>${styles}</style>
+          <style>${printStyles}</style>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
         </head>
         <body>
           <div class="print-container">${contentClone.outerHTML}</div>
@@ -241,15 +295,21 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
             document.fonts.ready.then(() => {
               setTimeout(() => {
                 window.print();
-                window.close();
+                setTimeout(() => window.close(), 100);
               }, 500);
             });
           </script>
         </body>
       </html>
     `);
+
     printWindow.document.close();
-    setIsLoading(false); // Hide loading animation
+    
+    // Reset loading state after print dialog is shown
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
     logMemoryUsage("after-print");
   };
 

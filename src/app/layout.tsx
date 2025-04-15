@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
 import { Toaster as SonnerToaster } from "sonner";
 import "./globals.css";
+import "../styles/print.css";
 import ClientErrorBoundary from "@/components/ClientErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
