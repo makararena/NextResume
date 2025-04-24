@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { monitoring } from "./monitoring";
+import { auth } from "@clerk/nextjs/server";
 
 // Define types for OpenAI API
 type SystemMessage = {
@@ -91,13 +92,33 @@ export class OpenAIClient {
     throw lastError || new Error("Operation failed after multiple retries");
   }
 
+  // Helper method to track AI generation usage
+  private async trackAIGeneration() {
+    try {
+      // Skip in development environment
+      if (process.env.NODE_ENV === 'development' && !process.env.FORCE_TRACK_AI) {
+        return;
+      }
+
+      const { userId } = await auth();
+      if (!userId) return;
+
+      await fetch('/api/user/increment-ai-generation', {
+        method: 'POST',
+      });
+    } catch (error) {
+      console.error('Failed to track AI generation:', error);
+      // Don't throw - we don't want to interrupt the main flow if tracking fails
+    }
+  }
+
   // Method to generate chat completions
   async chat(options: ChatOptions): Promise<string> {
     return monitoring.timeExecution('openai.chat', async () => {
       try {
         const { messages, temperature = 0.7, response_format } = options;
 
-        return await this.withRetry(async () => {
+        const result = await this.withRetry(async () => {
           const response = await this.client.chat.completions.create({
             model: "gpt-4o",
             messages,
@@ -107,6 +128,11 @@ export class OpenAIClient {
 
           return response.choices[0]?.message?.content || "";
         });
+
+        // Track AI generation
+        await this.trackAIGeneration();
+
+        return result;
       } catch (error) {
         monitoring.logError({
           message: "OpenAI API error in chat method",
@@ -321,7 +347,7 @@ Format it in a clear, structured way that maintains ALL original details. Do not
 
         console.log("Generating resume from CV analysis...");
         
-        return await this.withRetry(async () => {
+        const response = await this.withRetry(async () => {
           const response = await this.client.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -349,6 +375,11 @@ Format it in a clear, structured way that maintains ALL original details. Do not
           
           return content;
         });
+
+        // Track AI generation
+        await this.trackAIGeneration();
+
+        return response;
       } catch (error) {
         monitoring.logError({
           message: "OpenAI API error in generateResumeFromVisionAnalysis method",
@@ -525,7 +556,7 @@ Do not miss ANY information or details from the document, regardless of how irre
 
         console.log("Generating cover letter...");
         
-        return await this.withRetry(async () => {
+        const result = await this.withRetry(async () => {
           const response = await this.client.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -544,6 +575,11 @@ Do not miss ANY information or details from the document, regardless of how irre
 
           return response.choices[0]?.message?.content || "";
         });
+
+        // Track AI generation
+        await this.trackAIGeneration();
+
+        return result;
       } catch (error) {
         monitoring.logError({
           message: "OpenAI API error in generateCoverLetter method",
@@ -627,7 +663,7 @@ Do not miss ANY information or details from the document, regardless of how irre
         
         console.log("Generating HR message...");
         
-        return await this.withRetry(async () => {
+        const result = await this.withRetry(async () => {
           const response = await this.client.chat.completions.create({
             model: "gpt-4o",
             messages: [
@@ -646,6 +682,11 @@ Do not miss ANY information or details from the document, regardless of how irre
 
           return response.choices[0]?.message?.content || "";
         });
+
+        // Track AI generation
+        await this.trackAIGeneration();
+
+        return result;
       } catch (error) {
         monitoring.logError({
           message: "OpenAI API error in generateHRMessage method",

@@ -84,6 +84,11 @@ export async function generateSummary(input: GenerateSummaryInput) {
     throw new Error("Failed to generate AI response");
   }
 
+  // Increment AI generation count
+  await fetch("/api/user/increment-ai-generation", {
+    method: "POST",
+  });
+
   return aiResponse;
 }
 
@@ -137,6 +142,11 @@ export async function generateWorkExperience(
   if (!aiResponse) {
     throw new Error("Failed to generate AI response");
   }
+
+  // Increment AI generation count
+  await fetch("/api/user/increment-ai-generation", {
+    method: "POST",
+  });
 
   console.log("aiResponse", aiResponse);
 

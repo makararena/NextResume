@@ -1,100 +1,107 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL") // uses connection pooling
-  directUrl = env("DATABASE_URL") // uses a direct connection
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
 }
 
 model Resume {
-  id     String @id @default(cuid())
-  userId String
-
-  title       String?
-  description String?
-
-  photoUrl    String?
-  colorHex    String  @default("#000000")
-  borderStyle String  @default("squircle")
-  template    String  @default("classic")
-  summary     String?
-  firstName   String?
-  lastName    String?
-  jobTitle    String?
-  city        String?
-  country     String?
-  phone       String?
-  email       String?
-  jobDescription String? @db.Text
-  cvUrl       String?
-  
-  // Analysis fields
-  matchingPoints String[] @default([])
-  prioritizedSkills String[] @default([])
-  analysisReason String?
-
-  workExperiences WorkExperience[]
-  educations      Education[]
-  skills          String[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String           @id @default(cuid())
+  userId            String
+  title             String?
+  description       String?
+  photoUrl          String?
+  colorHex          String           @default("#000000")
+  borderStyle       String           @default("squircle")
+  summary           String?
+  firstName         String?
+  lastName          String?
+  jobTitle          String?
+  city              String?
+  country           String?
+  phone             String?
+  email             String?
+  skills            String[]
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  template          String           @default("classic")
+  cvUrl             String?
+  jobDescription    String?
+  analysisReason    String?
+  matchingPoints    String[]         @default([])
+  prioritizedSkills String[]         @default([])
+  educations        Education[]
+  workExperiences   WorkExperience[]
 
   @@map("resumes")
 }
 
 model WorkExperience {
-  id String @id @default(cuid())
-
+  id          String    @id @default(cuid())
   position    String?
   company     String?
   startDate   DateTime?
   endDate     DateTime?
   description String?
-
-  resumeId String
-  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  resumeId    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
   @@map("work_experiences")
 }
 
 model Education {
-  id String @id @default(cuid())
-
+  id          String    @id @default(cuid())
   degree      String?
   school      String?
   startDate   DateTime?
   endDate     DateTime?
+  resumeId    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   description String?
-
-  resumeId String
-  resume   Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  resume      Resume    @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
   @@map("educations")
 }
 
 model ResumeGroup {
-  id     String @id @default(cuid())
-  userId String
-  name   String
-  resumeIds String[] // Array of resume IDs
-  
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  resumeIds String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("resume_groups")
+}
+
+model UserSubscription {
+  id                      String    @id @default(cuid())
+  userId                  String    @unique
+  plan                    String    @default("free")
+  stripeCustomerId        String?   @unique
+  stripeSubscriptionId    String?   @unique
+  stripePriceId           String?
+  stripeCurrentPeriodEnd  DateTime?
+  stripeCancelAtPeriodEnd Boolean   @default(false)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@map("user_subscriptions")
+}
+
+model UserUsage {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  resumeCount       Int      @default(0)
+  aiGenerationCount Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("user_usages")
 }

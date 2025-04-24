@@ -12,6 +12,7 @@ export default clerkMiddleware({
     '/sign-up(.*)',
     '/api/webhooks(.*)',
     '/api/(.*)public(.*)',
+    '/api/user/usage',
     '/terms',
     '/privacy',
     '/pricing',
