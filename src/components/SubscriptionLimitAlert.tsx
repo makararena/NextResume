@@ -20,11 +20,11 @@ export function SubscriptionLimitAlert({ type, className = '' }: SubscriptionLim
   const messages = {
     resume: {
       title: "Resume Limit Reached",
-      description: `You've reached the limit of ${FREE_TIER_LIMITS.MAX_RESUMES} resumes on the free plan. Upgrade to premium for unlimited resumes.`
+      description: `You've reached ${FREE_TIER_LIMITS.MAX_RESUMES} resume limit. Upgrade to Premium for unlimited resumes.`
     },
     ai: {
       title: "AI Generation Limit Reached",
-      description: `You've reached the limit of ${FREE_TIER_LIMITS.MAX_AI_GENERATIONS} AI generations on the free plan. Upgrade to premium for unlimited AI features.`
+      description: `You've reached ${FREE_TIER_LIMITS.MAX_AI_GENERATIONS} AI generation limit. Upgrade to Premium for unlimited AI features.`
     }
   };
   
@@ -46,7 +46,7 @@ export function SubscriptionLimitAlert({ type, className = '' }: SubscriptionLim
         className="flex items-center gap-1.5 whitespace-nowrap ml-2 mt-0.5"
       >
         <CreditCard className="h-3.5 w-3.5" />
-        Upgrade Plan
+        Upgrade to Premium
       </Button>
     </Alert>
   );

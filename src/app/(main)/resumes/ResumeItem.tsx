@@ -27,6 +27,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, useEffect } from "react";
 import { deleteResume, duplicateResume } from "./actions";
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
 
 interface ResumeItemProps {
   resume: ResumeServerData;
@@ -156,6 +157,16 @@ function MoreMenu({
   onDeleted
 }: MoreMenuProps) {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const { canCreateResume, showUpgradeMessage } = useSubscriptionLimits();
+  const { toast } = useToast();
+
+  const handleDuplicate = () => {
+    if (canCreateResume()) {
+      onDuplicateClick();
+    } else {
+      showUpgradeMessage("resume");
+    }
+  };
 
   return (
     <>
@@ -172,11 +183,11 @@ function MoreMenu({
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             className="flex items-center gap-2 text-sm"
-            onClick={onDuplicateClick}
-            disabled={isDuplicating}
+            onClick={handleDuplicate}
+            disabled={isDuplicating || !canCreateResume()}
           >
             <Copy className="size-3" />
-            Duplicate
+            {canCreateResume() ? "Duplicate" : "Limit reached"}
           </DropdownMenuItem>
           
           {inCustomGroup && (

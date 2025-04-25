@@ -139,7 +139,7 @@ export default function SuccessModal({
               {/* Matching points section */}
               {displayPoints.length > 0 && (
                 <div className="mb-4">
-                  <h4 className="text-white font-semibold mb-2">Your Strengths for This Role :</h4>
+                  <h4 className="text-white font-semibold mb-2">Your Strengths:</h4>
                   <ul className="space-y-2">
                     {displayPoints.map((point, index) => (
                       <li key={index} className="flex items-start">
@@ -156,7 +156,7 @@ export default function SuccessModal({
               {/* Skills section */}
               {limitedSkills.length > 0 && (
                 <div className="mb-4">
-                  <h4 className="text-white font-semibold mb-2">Your Standout Skills :</h4>
+                  <h4 className="text-white font-semibold mb-2">Key Skills:</h4>
                   <div className="flex flex-wrap gap-1.5">
                     {limitedSkills.map((skill, index) => (
                       <div key={index} className="bg-white/10 rounded-full px-2 py-0.5 flex items-center">
@@ -171,7 +171,7 @@ export default function SuccessModal({
               {/* Reasoning section */}
               {analysis.reason && (
                 <div>
-                  <h4 className="text-white font-semibold mb-1">How You Match the Role :</h4>
+                  <h4 className="text-white font-semibold mb-1">How You Match:</h4>
                   <p className="text-gray-200 text-sm">
                     {truncateText(analysis.reason, 250)}
                   </p>

@@ -41,18 +41,6 @@ export default function GenerateWorkExperienceButton({
   const [showInputDialog, setShowInputDialog] = useState(false);
 
   return (
-    <>
-      <Button
-        variant="outline"
-        type="button"
-        onClick={() => {
-          // Allow all users to use AI tools since we removed premium features
-          setShowInputDialog(true);
-        }}
-      >
-        <WandSparklesIcon className="size-4" />
-        Smart fill (AI)
-      </Button>
       <InputDialog
         open={showInputDialog}
         onOpenChange={setShowInputDialog}
@@ -61,7 +49,6 @@ export default function GenerateWorkExperienceButton({
           setShowInputDialog(false);
         }}
       />
-    </>
   );
 }
 

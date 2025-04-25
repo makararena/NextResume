@@ -36,7 +36,7 @@ export default async function Page() {
     getUserSubscriptionLevel(userId),
   ]);
 
-  const canCreate = canCreateResume(totalCount, subscriptionLevel);
+  const canCreate = canCreateResume(subscriptionLevel, totalCount);
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6 px-3 py-6">

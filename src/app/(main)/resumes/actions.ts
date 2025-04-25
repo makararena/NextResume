@@ -93,9 +93,16 @@ export async function duplicateResume(id: string) {
     throw new Error("Resume not found");
   }
 
+  // Get current subscription level and resume count
+  const [subscriptionLevel, currentResumeCount] = await Promise.all([
+    getUserSubscriptionLevel(userId),
+    prisma.resume.count({
+      where: { userId },
+    }),
+  ]);
+
   // Check if user can create another resume
-  const canCreate = await canCreateResume(userId);
-  if (!canCreate) {
+  if (!canCreateResume(subscriptionLevel, currentResumeCount)) {
     throw new Error(
       "You've reached your limit of free resumes. Please upgrade to create more."
     );

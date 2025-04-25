@@ -670,11 +670,7 @@ export default function ResumeList({ initialResumes, totalCount, canCreate = fal
                 ) : (
                   <div className="text-center py-6">
                     <p className="text-sm text-muted-foreground">No resumes in this group yet.</p>
-                    {canCreate && (
-                      <div className="mt-3">
-                        <CreateResumeButton />
-                      </div>
-                    )}
+                    {/* CreateResumeButton moved to main page */}
                   </div>
                 )}
               </CollapsibleContent>

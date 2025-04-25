@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { monitoring } from "./monitoring";
 import { auth } from "@clerk/nextjs/server";
+import { incrementAiGenerationCount } from "./subscription";
 
 // Define types for OpenAI API
 type SystemMessage = {
@@ -103,9 +104,8 @@ export class OpenAIClient {
       const { userId } = await auth();
       if (!userId) return;
 
-      await fetch('/api/user/increment-ai-generation', {
-        method: 'POST',
-      });
+      // Call the utility function directly instead of using fetch
+      await incrementAiGenerationCount(userId);
     } catch (error) {
       console.error('Failed to track AI generation:', error);
       // Don't throw - we don't want to interrupt the main flow if tracking fails

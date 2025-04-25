@@ -1,12 +1,15 @@
 "use server";
 
 import { auth } from "@clerk/nextjs/server";
-import { put } from "@vercel/blob";
+import { revalidatePath } from "next/cache";
 import path from "path";
-import { ResumeValues } from "@/lib/validation";
 import { OpenAIClient } from "@/lib/openai";
+import { fileToBase64, extractTextFromPdf } from "@/lib/document-parser";
+import { put } from "@vercel/blob";
+import { canCreateResume, canUseAITools } from "@/lib/permissions";
+import { getUserSubscriptionLevel, getUserUsage, incrementAiGenerationCount } from "@/lib/subscription";
 import prisma from "@/lib/prisma";
-import pdfParse from "pdf-parse";
+import { ResumeValues } from "@/lib/validation";
 
 // Extract text from PDF file
 async function extractTextFromPdf(file: File): Promise<string> {
@@ -26,6 +29,23 @@ export async function generateAIResume(
   const { userId } = await auth();
   if (!userId) {
     throw new Error("User not authenticated");
+  }
+  
+  // Check user's current resume count and AI generation count against limits
+  const [subscriptionLevel, currentResumeCount, userUsage] = await Promise.all([
+    getUserSubscriptionLevel(userId),
+    prisma.resume.count({ where: { userId } }),
+    getUserUsage(userId),
+  ]);
+  
+  // Check if user can create another resume
+  if (!canCreateResume(subscriptionLevel, currentResumeCount)) {
+    throw new Error("You've reached your limit of free resumes. Please upgrade to create more.");
+  }
+  
+  // Check if user can use AI generation (only if they're not using pre-generated data)
+  if (!resumeJson && !canUseAITools(subscriptionLevel, userUsage.aiGenerationCount)) {
+    throw new Error("You've reached your limit of free AI generations. Please upgrade for unlimited AI features.");
   }
 
   try {
@@ -119,6 +139,12 @@ export async function generateAIResume(
       photoUrl,
       jobDescription
     );
+
+    // After creating the resume, increment the AI generation count
+    // We don't need to do anything here because:
+    // 1. For OpenAI-generated content, the tracking happens in the OpenAI client's trackAIGeneration method
+    // 2. For pre-generated content, we shouldn't increment usage as that's not a new AI generation
+    
     return resume.id;
 
   } catch (error) {

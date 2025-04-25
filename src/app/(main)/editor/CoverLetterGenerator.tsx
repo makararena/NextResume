@@ -23,9 +23,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { FileText, Loader, MessageSquare, Copy, Check, RotateCcw } from "lucide-react";
+import { FileText, Loader, MessageSquare, Copy, Check, RotateCcw, File } from "lucide-react";
 import { generateCoverLetter } from "./actions";
 import { toast } from "sonner";
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import Link from "next/link";
 
 interface CoverLetterGeneratorProps {
   resumeId: string;
@@ -45,6 +48,7 @@ export default function CoverLetterGenerator({
   const [showConfirm, setShowConfirm] = useState(false);
   
   const editorRef = useRef<HTMLTextAreaElement>(null);
+  const { canUseAIGeneration } = useSubscriptionLimits();
   
   // Save job description to localStorage when it changes
   useEffect(() => {
@@ -187,131 +191,148 @@ export default function CoverLetterGenerator({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={handleDialogChange}>
-        <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="flex items-center gap-2">
-            <MessageSquare size={16} />
-            <span>Generate Cover Letter</span>
-          </Button>
-        </DialogTrigger>
-        
-        <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Cover Letter Generator</DialogTitle>
-            <DialogDescription>
-              Generate a personalized cover letter based on your resume and the job description
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow overflow-hidden">
-            <div className="space-y-4 overflow-y-auto p-1">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label htmlFor="jobDescription" className="text-sm font-medium">
-                    Job Description
-                  </label>
-                  {jobDesc && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={resetJobDescription}
-                      className="h-7 px-2 text-xs"
-                      disabled={isLoading || isResetting}
-                    >
-                      {isResetting ? (
-                        <>
-                          <Loader size={14} className="mr-1 animate-spin" />
-                          Resetting...
-                        </>
-                      ) : (
-                        <>
-                          <RotateCcw size={14} className="mr-1" />
-                          Reset
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </div>
-                <Textarea
-                  id="jobDescription"
-                  placeholder="Paste the job description here..."
-                  className="h-40 resize-none"
-                  value={jobDesc}
-                  onChange={(e) => setJobDesc(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="additionalInfo" className="text-sm font-medium">
-                  Additional Information (Optional)
-                </label>
-                <Textarea
-                  id="additionalInfo"
-                  placeholder="Add any additional information or specific requests for your cover letter..."
-                  className="h-32 resize-none"
-                  value={additionalInfo}
-                  onChange={(e) => setAdditionalInfo(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-              
-              <Button 
-                onClick={handleGenerateCoverLetter} 
-                disabled={isLoading || !jobDesc.trim()}
-                className="w-full"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader size={16} className="mr-2 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <FileText size={16} className="mr-2" />
-                    Generate Cover Letter
-                  </>
-                )}
-              </Button>
-            </div>
-            
-            <div className="border rounded-md overflow-hidden flex flex-col">
-              <div className="p-2 bg-muted flex justify-between items-center border-b">
-                <span className="text-sm font-medium">Cover Letter</span>
-                {coverLetter && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCopy}
-                    className="h-8 px-2"
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span>
+              <Dialog open={isOpen} onOpenChange={handleDialogChange}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-2"
+                    disabled={!canUseAIGeneration()}
                   >
-                    {copied ? (
-                      <Check size={16} className="mr-1 text-green-500" />
-                    ) : (
-                      <Copy size={16} className="mr-1" />
-                    )}
-                    {copied ? "Copied" : "Copy"}
+                    <File size={16} />
+                    <span>Generate Cover Letter</span>
                   </Button>
-                )}
-              </div>
-              <Textarea
-                ref={editorRef}
-                placeholder="Your generated cover letter will appear here..."
-                className="flex-grow h-full resize-none rounded-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                value={coverLetter}
-                onChange={(e) => setCoverLetter(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle>Cover Letter Generator</DialogTitle>
+                    <DialogDescription>
+                      Generate a personalized cover letter based on your resume and the job description
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow overflow-hidden">
+                    <div className="space-y-4 overflow-y-auto p-1">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <label htmlFor="jobDescription" className="text-sm font-medium">
+                            Job Description
+                          </label>
+                          {jobDesc && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={resetJobDescription}
+                              className="h-7 px-2 text-xs"
+                              disabled={isLoading || isResetting}
+                            >
+                              {isResetting ? (
+                                <>
+                                  <Loader size={14} className="mr-1 animate-spin" />
+                                  Resetting...
+                                </>
+                              ) : (
+                                <>
+                                  <RotateCcw size={14} className="mr-1" />
+                                  Reset
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                        <Textarea
+                          id="jobDescription"
+                          placeholder="Paste the job description here..."
+                          className="h-40 resize-none"
+                          value={jobDesc}
+                          onChange={(e) => setJobDesc(e.target.value)}
+                          disabled={isLoading}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label htmlFor="additionalInfo" className="text-sm font-medium">
+                          Additional Information (Optional)
+                        </label>
+                        <Textarea
+                          id="additionalInfo"
+                          placeholder="Add any additional information or specific requests for your cover letter..."
+                          className="h-32 resize-none"
+                          value={additionalInfo}
+                          onChange={(e) => setAdditionalInfo(e.target.value)}
+                          disabled={isLoading}
+                        />
+                      </div>
+                      
+                      <Button 
+                        onClick={handleGenerateCoverLetter} 
+                        disabled={isLoading || !jobDesc.trim()}
+                        className="w-full"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader size={16} className="mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <FileText size={16} className="mr-2" />
+                            Generate Cover Letter
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    
+                    <div className="border rounded-md overflow-hidden flex flex-col">
+                      <div className="p-2 bg-muted flex justify-between items-center border-b">
+                        <span className="text-sm font-medium">Cover Letter</span>
+                        {coverLetter && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleCopy}
+                            className="h-8 px-2"
+                          >
+                            {copied ? (
+                              <Check size={16} className="mr-1 text-green-500" />
+                            ) : (
+                              <Copy size={16} className="mr-1" />
+                            )}
+                            {copied ? "Copied" : "Copy"}
+                          </Button>
+                        )}
+                      </div>
+                      <Textarea
+                        ref={editorRef}
+                        placeholder="Your generated cover letter will appear here..."
+                        className="flex-grow h-full resize-none rounded-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        value={coverLetter}
+                        onChange={(e) => setCoverLetter(e.target.value)}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </div>
+                  
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsOpen(false)}>
+                      Close
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </span>
+          </TooltipTrigger>
+          {!canUseAIGeneration() && (
+            <TooltipContent className="max-w-xs p-3">
+              <p>You've reached your free AI generations limit. <Link href="/dashboard" className="text-primary underline">Upgrade to premium</Link> for unlimited AI features.</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
+      </TooltipProvider>
       
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContent>

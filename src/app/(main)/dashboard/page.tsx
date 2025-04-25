@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useSubscriptionLevel } from "../SubscriptionLevelProvider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, FileText, Sparkles, PaintBucket, Zap, Crown, X } from "lucide-react";
+import { Check, FileText, Sparkles, PaintBucket, Zap, Crown, X, ArrowLeft } from "lucide-react";
 import { FREE_TIER_LIMITS } from "@/lib/subscription";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ export default function DashboardPage() {
   
   // Check for success or canceled from Stripe redirect
   useEffect(() => {
+    // Check for success from Stripe redirect
     if (searchParams.get("success")) {
       toast({
         title: "Subscription successful!",
@@ -31,12 +32,30 @@ export default function DashboardPage() {
       });
     }
     
-    if (searchParams.get("canceled")) {
-      toast({
-        title: "Subscription canceled",
-        description: "You can still upgrade anytime.",
-        duration: 5000,
-      });
+    // Check for cancellation from Stripe redirect
+    try {
+      if (searchParams.get("canceled")) {
+        toast({
+          title: "Subscription canceled",
+          description: "You can still upgrade anytime.",
+          duration: 5000,
+        });
+        
+        // Remove the canceled parameter from URL to prevent repeated errors
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("canceled");
+        window.history.replaceState({}, "", newUrl.toString());
+      }
+    } catch (error) {
+      console.error("Error handling canceled parameter:", error);
+      // Still clean up the URL to prevent further errors
+      try {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("canceled");
+        window.history.replaceState({}, "", newUrl.toString());
+      } catch (e) {
+        console.error("Failed to clean up URL:", e);
+      }
     }
   }, [searchParams, toast]);
   
@@ -117,7 +136,19 @@ export default function DashboardPage() {
   };
   
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4">
+    <div className="flex flex-col items-center py-12 px-4">
+      <div className="w-full max-w-3xl mb-8">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex items-center text-muted-foreground hover:text-foreground" 
+          onClick={() => router.push("/")}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Home
+        </Button>
+      </div>
+      
       <div className="text-center mb-10 max-w-lg">
         <h1 className="text-3xl font-bold mb-2">Choose your plan</h1>
         <p className="text-muted-foreground">
@@ -168,15 +199,7 @@ export default function DashboardPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Basic templates</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-sm">Manual resume editing</span>
-                </li>
-                <li className="flex items-start opacity-50">
-                  <X className="h-5 w-5 text-gray-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Premium templates</span>
                 </li>
                 <li className="flex items-start opacity-50">
                   <X className="h-5 w-5 text-gray-400 mr-2 mt-0.5 flex-shrink-0" />
@@ -199,7 +222,7 @@ export default function DashboardPage() {
               <div className="flex flex-col space-y-1.5">
                 <CardTitle className="text-2xl font-bold">Premium Plan</CardTitle>
                 <CardDescription className="text-base">
-                  Unlock all premium features and unlimited usage
+                  Access comprehensive resume optimization tools and unlimited usage capabilities.
                 </CardDescription>
               </div>
             </CardHeader>
@@ -207,7 +230,7 @@ export default function DashboardPage() {
             <CardContent className="px-6 pb-0">
               <div className="flex flex-col space-y-4">
                 <div>
-                  <p className="text-4xl font-bold tracking-tight">$10</p>
+                  <p className="text-4xl font-bold tracking-tight">$9.99</p>
                   <p className="text-muted-foreground mt-1">/month</p>
                 </div>
                 
@@ -225,14 +248,14 @@ export default function DashboardPage() {
                     className="w-full py-6 text-base" 
                     disabled={isLoading}
                   >
-                    Start a free trial
+                    Upgrade to Premium
                   </Button>
                 )}
               </div>
             </CardContent>
             
             <div className="p-6">
-              <h3 className="font-semibold mb-4">Everything in Free, plus:</h3>
+              <h3 className="font-semibold mb-4">Premium Features:</h3>
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
@@ -241,14 +264,6 @@ export default function DashboardPage() {
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                   <span className="text-sm">Unlimited AI generations</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Premium templates and styles</span>
-                </li>
-                <li className="flex items-start">
-                  <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm">Advanced AI tools</span>
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />

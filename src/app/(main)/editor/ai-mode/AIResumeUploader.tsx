@@ -14,6 +14,8 @@ import ImageCropper from "@/components/ImageCropper";
 import SuccessModal from "@/components/SuccessModal";
 import Link from "next/link";
 import { getResume } from "@/app/(main)/resumes/actions";
+import { useSubscriptionLimits } from "@/hooks/useSubscriptionLimits";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function AIResumeUploader() {
   const router = useRouter();
@@ -33,7 +35,14 @@ export default function AIResumeUploader() {
     prioritizedSkills: string[];
     reason: string | null;
   } | undefined>(undefined);
+  const { canUseAIGeneration } = useSubscriptionLimits();
+  const [limitReached, setLimitReached] = useState(false);
   
+  // Check if user can use AI generation
+  useEffect(() => {
+    setLimitReached(!canUseAIGeneration());
+  }, [canUseAIGeneration]);
+
   // Cleanup function for blob URLs
   useEffect(() => {
     return () => {
@@ -457,26 +466,44 @@ export default function AIResumeUploader() {
           </div>
           
           <div className="pt-6 mt-4 border-t flex flex-col items-center">
-            <Button 
-              type="submit" 
-              size="lg"
-              className="w-full sm:w-auto px-8 text-lg py-6"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  Generate AI Resume
-                </>
-              )}
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="w-full sm:w-auto">
+                    <Button 
+                      type="submit" 
+                      size="lg"
+                      className="w-full sm:w-auto px-8 text-lg py-6"
+                      disabled={isLoading || limitReached}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                          Processing...
+                        </>
+                      ) : limitReached ? (
+                        <>
+                          <AlertTriangle className="mr-2 h-5 w-5" />
+                          AI Generation Limit Reached
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-5 w-5" />
+                          Generate AI Resume
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {limitReached && (
+                  <TooltipContent className="max-w-xs">
+                    <p>You've reached your free AI generations limit. <Link href="/dashboard" className="text-primary underline">Upgrade to premium</Link> for unlimited AI resume generation.</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
             <p className="text-sm text-muted-foreground mt-3">
-              Please wait about 10 seconds for your AI resume to be built.
+              {!limitReached ? "Please wait about 10 seconds for your AI resume to be built." : "Upgrade to premium for unlimited AI resume generations."}
             </p>
           </div>
         </form>

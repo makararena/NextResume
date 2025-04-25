@@ -7,6 +7,7 @@ import { Toaster as SonnerToaster } from "sonner";
 import "./globals.css";
 import "../styles/print.css";
 import ClientErrorBoundary from "@/components/ClientErrorBoundary";
+import DevTools from "@/components/test/DevTools";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -47,6 +48,7 @@ export default function RootLayout({
             </ClientErrorBoundary>
             <Toaster />
             <SonnerToaster position="top-right" />
+            <DevTools />
           </ThemeProvider>
         </body>
       </html>

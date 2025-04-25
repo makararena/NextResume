@@ -110,7 +110,7 @@ export default function Home() {
               </h1>
             </div>
             <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Break through the bots. Get past the algorithms. Land the interviews you deserve.
+              Built to overcome ATS filters and algorithms. Our solution helps you secure interviews your qualifications deserve.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
@@ -132,31 +132,31 @@ export default function Home() {
               <div className="bg-primary/10 p-2 rounded-full">
                 <Target className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-base sm:text-lg text-muted-foreground">ATS-busting keyword optimization</p>
+              <p className="text-base sm:text-lg text-muted-foreground">Beats automated filters</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-2 rounded-full">
                 <LayoutTemplate className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-base sm:text-lg text-muted-foreground">Templates proven to increase pass rates by 70%</p>
+              <p className="text-base sm:text-lg text-muted-foreground">Templates with 70% higher pass rates</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-2 rounded-full">
                 <Search className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-base sm:text-lg text-muted-foreground">Professional formatting that recruiters notice</p>
+              <p className="text-base sm:text-lg text-muted-foreground">Formatting that recruiters notice</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-2 rounded-full">
                 <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-base sm:text-lg text-muted-foreground">Create resumes from scratch or optimize existing ones</p>
+              <p className="text-base sm:text-lg text-muted-foreground">New or existing resume options</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-2 rounded-full">
                 <Edit className="h-5 w-5 sm:h-6 sm:w-6 text-primary" strokeWidth={2.5} />
               </div>
-              <p className="text-base sm:text-lg text-muted-foreground">Full editing control of AI-generated resumes</p>
+              <p className="text-base sm:text-lg text-muted-foreground">Full control of AI-generated resumes</p>
             </div>
           </div>
         </div>
@@ -174,19 +174,19 @@ export default function Home() {
               <ul className="space-y-4 flex-grow">
                 <li className="flex gap-2">
                   <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base">Companies are using AI-driven filters and ATS systems to screen candidates.</p>
+                  <p className="text-sm sm:text-base">AI systems screen candidates before humans see resumes.</p>
                 </li>
                 <li className="flex gap-2">
                   <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base">98% of resumes are rejected before a human ever sees them.</p>
+                  <p className="text-sm sm:text-base">98% of resumes get rejected automatically.</p>
                 </li>
                 <li className="flex gap-2">
                   <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base">Manual tailoring is exhausting, frustrating, and rarely works at scale.</p>
+                  <p className="text-sm sm:text-base">Manual tailoring is time-consuming and ineffective.</p>
                 </li>
                 <li className="flex gap-2">
                   <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base">You're not failing the interview — you're failing to reach it.</p>
+                  <p className="text-sm sm:text-base">You're not failing interviews — you're not reaching them.</p>
                 </li>
               </ul>
             </div>
@@ -199,31 +199,31 @@ export default function Home() {
               <ul className="space-y-4 flex-grow">
                 <li className="flex gap-2">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base text-foreground">AI-powered resume tailoring, fully based on your target job description</p>
+                  <p className="text-sm sm:text-base text-foreground">AI tailoring based on your target job</p>
                 </li>
                 <li className="flex gap-2">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base text-foreground">Instant keyword mapping to match ATS filters perfectly</p>
+                  <p className="text-sm sm:text-base text-foreground">Keyword mapping for ATS filters</p>
                 </li>
                 <li className="flex gap-2">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base text-foreground">Clean, professional formatting to grab recruiter attention</p>
+                  <p className="text-sm sm:text-base text-foreground">Clean formatting to attract recruiters</p>
                 </li>
                 <li className="flex gap-2">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base text-foreground">Speed: Get your optimized resume in under 10 seconds</p>
+                  <p className="text-sm sm:text-base text-foreground">Optimized resumes in under 10 seconds</p>
                 </li>
                 <li className="flex gap-2">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base text-foreground">Fully editable output, so you stay in control</p>
+                  <p className="text-sm sm:text-base text-foreground">Fully editable output for control</p>
                 </li>
                 <li className="flex gap-2">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base text-foreground">Create brand new resumes from scratch with our intuitive editor</p>
+                  <p className="text-sm sm:text-base text-foreground">Optimized for AI and human readers</p>
                 </li>
                 <li className="flex gap-2">
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0 mt-1" />
-                  <p className="text-sm sm:text-base text-foreground">Full flexibility to modify AI-generated content to your preference</p>
+                  <p className="text-sm sm:text-base text-foreground">Create new or optimize existing resumes</p>
                 </li>
               </ul>
             </div>
@@ -238,7 +238,7 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl font-bold mb-2">
               How It Works
             </h2>
-            <p className="text-muted-foreground mt-2">Optimize an existing resume or create one from scratch - you have options</p>
+            <p className="text-muted-foreground mt-2">Choose from two simple options</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
@@ -246,37 +246,33 @@ export default function Home() {
               <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <Upload className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2">Step 1: Upload your current resume</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Step 1: Upload resume</h3>
               <p className="text-sm sm:text-base text-muted-foreground">
-                No need to start from scratch, or choose our editor to build one from the ground up.
+                Import your existing resume or use our editor to create a new one.
               </p>
             </div>
 
             <div
-              className="bg-card p-6 sm:p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
-              style={{ animationDelay: "0.2s" }}
+              className="bg-card p-6 sm:p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up delay-100"
             >
               <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2">Step 2: Paste your target job description</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Step 2: Add job description</h3>
               <p className="text-sm sm:text-base text-muted-foreground">
-                We'll map the critical keywords and align your experiences.
+                Paste the job posting to allow our system to analyze keywords and match your qualifications.
               </p>
             </div>
 
             <div
-              className="bg-card p-6 sm:p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up"
-              style={{ animationDelay: "0.4s" }}
+              className="bg-card p-6 sm:p-8 rounded-lg shadow-sm flex flex-col items-center text-center transform transition hover:shadow-lg hover:-translate-y-1 animate-fade-in-up delay-200"
             >
               <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2">
-                Step 3: Get your optimized resume in 10 seconds
-              </h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Step 3: Download optimized resume</h3>
               <p className="text-sm sm:text-base text-muted-foreground">
-                ATS-friendly, recruiter-ready, and fully editable.
+                Get your ATS-optimized resume in seconds, ready to submit with confidence.
               </p>
             </div>
           </div>
@@ -383,31 +379,44 @@ export default function Home() {
       <section className="py-16 sm:py-20 px-4 sm:px-6 bg-muted/20">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold mb-8 sm:mb-10 text-center">Frequently Asked Questions</h2>
+          <p className="text-muted-foreground pb-8 sm:pb-10">
+            Get answers to common questions
+          </p>
           
           <div className="space-y-4 sm:space-y-6">
             <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">How fast is the process?</h3>
-              <p className="text-sm sm:text-base">Less than 10 seconds from upload to final resume.</p>
+              <h3 className="text-lg font-semibold">How does the resume builder work?</h3>
+              <div className="mt-2 text-muted-foreground">
+                Upload your resume or create a new one, add the job description, and our AI analyzes keywords and patterns to optimize your resume for ATS systems.
+              </div>
             </div>
             
             <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Will it work for my industry?</h3>
-              <p className="text-sm sm:text-base">Yes. Our AI adapts to every industry and experience level.</p>
+              <h3 className="text-lg font-semibold">Is my data secure?</h3>
+              <div className="mt-2 text-muted-foreground">
+                Yes. We use encryption and secure data practices. Your information is never shared with third parties.
+              </div>
             </div>
             
             <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Can I edit my resume after?</h3>
-              <p className="text-sm sm:text-base">Absolutely. You'll receive a fully editable version.</p>
+              <h3 className="text-lg font-semibold">Can I customize my resume after optimization?</h3>
+              <div className="mt-2 text-muted-foreground">
+                Yes. Our editor gives you full control to modify any part of your resume after AI optimization.
+              </div>
             </div>
             
             <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Can I create a resume from scratch?</h3>
-              <p className="text-sm sm:text-base">Yes! You can either optimize an existing resume or create a brand new one from scratch using our editor.</p>
+              <h3 className="text-lg font-semibold">What file formats are supported?</h3>
+              <div className="mt-2 text-muted-foreground">
+                We support PDF, DOCX, and TXT formats for uploads. You can download your optimized resume as PDF or DOCX.
+              </div>
             </div>
             
             <div className="bg-card p-4 sm:p-6 rounded-lg border border-border">
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">Can I modify the AI-generated resume?</h3>
-              <p className="text-sm sm:text-base">Of course. You have full control to edit any section of your AI-generated resume to make it perfect for your needs.</p>
+              <h3 className="text-lg font-semibold">How do I cancel my subscription?</h3>
+              <div className="mt-2 text-muted-foreground">
+                Go to Account Settings and select "Manage Subscription" to cancel anytime.
+              </div>
             </div>
           </div>
         </div>
@@ -416,8 +425,8 @@ export default function Home() {
       {/* Final CTA */}
       <section className="py-12 sm:py-16 px-4 sm:px-6 bg-background">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Don't let automation decide your future.</h2>
-          <p className="text-lg sm:text-xl mb-6 sm:mb-8">Upload your resume and job description now — let's get you in front of real people.</p>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">Your professional achievements deserve recognition. Let us ensure they receive proper consideration.</h2>
+          <p className="text-lg sm:text-xl mb-6 sm:mb-8">Unlock the full potential of your professional profile with our Premium subscription at $9.99/month. Our sophisticated optimization tools will position your resume for success in today's competitive market.</p>
           
           <Button size="lg" className="w-full sm:w-auto mt-4" asChild>
             <Link href={isSignedIn ? "/resumes" : "/sign-in"}>
