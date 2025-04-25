@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { ResumeValues } from "@/lib/validation";
 import ColorPicker from "./ColorPicker";
 import { useRef, useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 interface ResumePreviewSectionProps {
   resumeData: ResumeValues;
@@ -11,8 +12,10 @@ interface ResumePreviewSectionProps {
   showFormattingControls?: boolean;
 }
 
-// A4 aspect ratio (width:height = 1:1.414)
-const A4_ASPECT_RATIO = 1.414;
+// A4 dimensions in pixels at 96 DPI (standard screen resolution)
+const A4_WIDTH_PX = 790; // 210mm at 96 DPI
+const A4_HEIGHT_PX = 1122; // 297mm at 96 DPI
+const A4_ASPECT_RATIO = A4_HEIGHT_PX / A4_WIDTH_PX; // 1.414
 
 export default function ResumePreviewSection({
   resumeData,
@@ -26,8 +29,21 @@ export default function ResumePreviewSection({
   const [isReady, setIsReady] = useState(false);
   const [containerHeight, setContainerHeight] = useState(700);
   const [scale, setScale] = useState(0.5);
+  const [baseScale, setBaseScale] = useState(0.5);
   const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const handleZoomIn = () => {
+    setScale(prevScale => Math.min(prevScale + 0.1, 1.5));
+  };
+  
+  const handleZoomOut = () => {
+    setScale(prevScale => Math.max(prevScale - 0.1, 0.3));
+  };
+  
+  const handleResetZoom = () => {
+    setScale(baseScale);
+  };
   
   // Calculate available height and determine if mobile
   useEffect(() => {
@@ -51,21 +67,18 @@ export default function ResumePreviewSection({
       
       // Calculate appropriate scale based on device width
       const containerWidth = containerRef.current?.clientWidth || 800;
-      // A4 width is typically around 794px at 100% scale
-      const resumeWidth = 794;
-      const resumeHeight = resumeWidth * A4_ASPECT_RATIO;
       
       // Calculate scale
       let newScale = 0.5; // Default scale
       
       if (isMobileView) {
         // For mobile, scale to fit width with minimal padding
-        newScale = (containerWidth - 20) / resumeWidth;
+        newScale = (containerWidth - 40) / A4_WIDTH_PX;
       } else {
         // For desktop, prioritize height more to show more content
         newScale = Math.min(
-          (containerWidth - 20) / resumeWidth,  // Reduced padding
-          (availableHeight - 20) / resumeHeight // Reduced padding
+          (containerWidth - 40) / A4_WIDTH_PX,  // Reduced padding
+          (availableHeight - 40) / A4_HEIGHT_PX // Reduced padding
         );
         
         // For larger screens, we can afford to use a bit more space
@@ -76,6 +89,7 @@ export default function ResumePreviewSection({
       
       // Limit scale to reasonable values but allow larger scale on bigger screens
       newScale = Math.max(0.3, Math.min(newScale, 0.95));
+      setBaseScale(newScale);
       setScale(newScale);
       
       console.log("📏 Container height calculated:", Math.max(400, availableHeight));
@@ -110,40 +124,81 @@ export default function ResumePreviewSection({
 
   console.timeEnd("⏱️ ResumePreviewSection render time");
 
+  // Calculate zoom percentage for display
+  const zoomPercentage = Math.round(scale * 100);
+
+  // Prefetch console times to prevent ReactNode errors
+  useEffect(() => {
+    if (isReady) {
+      console.time("⏱️ ResumePreview component render");
+      console.timeEnd("⏱️ ResumePreview component render");
+    }
+  }, [isReady]);
+
   return (
     <div
       className={cn("relative h-full w-full", className)}
       ref={containerRef}
     >
-      {!showFormattingControls && (
-        <div className="absolute right-3 top-3 flex flex-col gap-3 z-10 print:hidden">
+      <div className="absolute right-3 top-3 flex flex-col gap-3 z-20 print:hidden">
+        <div className="flex items-center gap-2 mb-2">
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="h-8 w-8 p-0 bg-primary/90 hover:bg-primary text-primary-foreground" 
+            onClick={handleZoomOut}
+            title="Zoom out"
+          >
+            <span className="text-lg font-bold">−</span>
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="h-8 px-2 bg-primary/90 hover:bg-primary text-primary-foreground text-xs" 
+            onClick={handleResetZoom}
+            title="Reset zoom"
+          >
+            {zoomPercentage}%
+          </Button>
+          <Button 
+            variant="default" 
+            size="sm" 
+            className="h-8 w-8 p-0 bg-primary/90 hover:bg-primary text-primary-foreground" 
+            onClick={handleZoomIn}
+            title="Zoom in"
+          >
+            <span className="text-lg font-bold">+</span>
+          </Button>
+        </div>
+        {!showFormattingControls && (
           <ColorPicker
             color={resumeData.colorHex}
             onChange={(color) =>
               setResumeData({ ...resumeData, colorHex: color.hex })
             }
           />
-        </div>
-      )}
-      <div 
-        className="flex w-full justify-center overflow-y-auto bg-muted rounded-lg p-2 print:h-auto print:overflow-visible print:bg-white print:p-0 print:rounded-none"
+        )}
+      </div>
+      {/* Scrollable viewport with zoomed resume */}
+      <div
+        className="w-full h-full bg-muted overflow-auto rounded-lg p-4 print:rounded-none print:p-0 print:bg-white print:overflow-visible"
         style={{ height: `${containerHeight}px` }}
       >
         {isReady && (
-          <div className="resume-preview-container w-full max-w-4xl flex justify-center items-start overflow-visible print:max-w-none print:shadow-none print:w-full print:h-full print:scale-100">
-            <div style={{ 
-              transform: `scale(${scale})`, 
-              transformOrigin: 'top center',
-              transition: 'transform 0.2s ease-in-out',
-              marginBottom: `${30 * scale}px` // Add some bottom margin that scales with the content
-            }}>
-              {console.time("⏱️ ResumePreview component render")}
-              <ResumePreview
-                resumeData={resumeData}
-                className="w-full"
-              />
-              {console.timeEnd("⏱️ ResumePreview component render")}
-            </div>
+          <div
+            className="resume-preview-container"
+            style={{
+              transform: `scale(${scale})`,
+              transformOrigin: 'center',
+              margin: '50px auto',
+              width: 'fit-content',
+              padding: `${50 * scale}px`
+            }}
+          >
+            <ResumePreview
+              resumeData={resumeData}
+              className="w-full h-full"
+            />
           </div>
         )}
       </div>

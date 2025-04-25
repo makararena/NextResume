@@ -145,7 +145,8 @@ export async function generateAIResume(formData: FormData) {
             degree: edu.degree,
             school: edu.school,
             startDate: new Date(edu.startDate),
-            endDate: new Date(edu.endDate),
+            endDate: edu.endDate ? new Date(edu.endDate) : null,
+            description: edu.description,
           })) || [],
         },
         skills: {

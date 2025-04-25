@@ -25,37 +25,7 @@ export default function ResumePreview({
   className,
 }: ResumePreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-  const [contentHeight, setContentHeight] = useState(A4_HEIGHT_PX);
   
-  // Calculate the appropriate scale based on container width
-  useEffect(() => {
-    const updateScale = () => {
-      if (!containerRef.current) return;
-      
-      // Get parent container
-      const parent = containerRef.current.closest('.resume-preview-container');
-      if (!parent) return;
-      
-      // Get available width (minus some padding)
-      const availableWidth = parent.clientWidth - 20;
-      
-      // Calculate scale based on A4 width to fit container width
-      const newScale = Math.min(1, availableWidth / A4_WIDTH_PX);
-      setScale(newScale > 0.2 ? newScale : 0.2); // Limit minimum scale
-    };
-    
-    // Initial update
-    updateScale();
-    
-    // Add resize event listener
-    window.addEventListener('resize', updateScale);
-    
-    return () => {
-      window.removeEventListener('resize', updateScale);
-    };
-  }, []);
-
   const template = resumeData.template || "classic";
 
   const renderTemplate = () => {
@@ -71,31 +41,18 @@ export default function ResumePreview({
   };
 
   return (
-    <div className="relative w-full flex justify-center" style={{ minHeight: A4_HEIGHT_PX * scale }}>
-      {/* A4 container with fixed dimensions */}
-      <div
-        style={{
-          transform: `scale(${scale * 2})`,
-          transformOrigin: "top center",
-          width: `${A4_WIDTH_PX}px`,
-          height: `${A4_HEIGHT_PX}px`,
-          maxHeight: `${A4_HEIGHT_PX}px`,
-        }}
-        className={cn(
-          "bg-white text-black print:scale-100 print:w-[210mm] print:h-[297mm] print:max-h-[297mm] print:overflow-hidden shadow-lg",
-          className,
-        )}
-      >
-        <div 
-          ref={containerRef} 
-          className="w-full h-full overflow-hidden" 
-          style={{
-            maxHeight: `${A4_HEIGHT_PX}px`,
-          }}
-        >
-          {renderTemplate()}
-        </div>
-      </div>
+    <div
+      ref={containerRef}
+      className={cn(
+        "bg-white text-black shadow-lg print:scale-100 print:w-[210mm] print:h-[297mm] print:max-h-[297mm] print:overflow-hidden",
+        className,
+      )}
+      style={{
+        width: `${A4_WIDTH_PX}px`,
+        height: `${A4_HEIGHT_PX}px`,
+      }}
+    >
+      {renderTemplate()}
     </div>
   );
 }
@@ -128,10 +85,9 @@ function ClassicTemplate({ resumeData }: { resumeData: ResumeValues }) {
 
   return (
     <div
-      className="space-y-8 p-7 print:p-7 h-full overflow-hidden"
+      className="space-y-8 p-7 print:p-7 h-full"
       style={{
         transform: isPrinting ? 'none' : undefined,
-        maxHeight: `${A4_HEIGHT_PX}px`,
       }}
       ref={containerRef}
     >
@@ -176,18 +132,16 @@ function ModernTemplate({ resumeData }: { resumeData: ResumeValues }) {
   
   return (
     <div
-      className="grid grid-cols-3 gap-6 h-full print:h-full overflow-hidden"
+      className="grid grid-cols-3 gap-6 h-full print:h-full"
       style={{
         transform: isPrinting ? 'none' : undefined,
-        maxHeight: `${A4_HEIGHT_PX}px`,
       }}
       ref={containerRef}
     >
       <div 
-        className="col-span-1 p-7 flex flex-col print:overflow-hidden overflow-hidden"
+        className="col-span-1 p-7 flex flex-col print:overflow-hidden"
         style={{ 
           backgroundColor: colorHex,
-          maxHeight: `${A4_HEIGHT_PX}px`,
         }}
       >
         <div className="mb-8 text-center">
@@ -213,7 +167,7 @@ function ModernTemplate({ resumeData }: { resumeData: ResumeValues }) {
         </div>
       </div>
       
-      <div className="col-span-2 p-7 flex flex-col space-y-7 print:overflow-hidden overflow-hidden" style={{ maxHeight: `${A4_HEIGHT_PX}px` }}>
+      <div className="col-span-2 p-7 flex flex-col space-y-7 print:overflow-hidden" style={{}}>
         <div className="space-y-4">
           <h2 className="text-lg font-bold"
             style={{ color: colorHex }}
@@ -265,27 +219,38 @@ function MinimalistTemplate({ resumeData }: { resumeData: ResumeValues }) {
     }
   }, []);
   
+  const colorHex = resumeData.colorHex || "#1A73E8";
+
   return (
     <div
-      className="p-10 space-y-7 print:p-10 h-full overflow-hidden"
+      className="p-7 space-y-6 h-full"
+      ref={containerRef}
       style={{
         transform: isPrinting ? 'none' : undefined,
-        maxHeight: `${A4_HEIGHT_PX}px`,
       }}
-      ref={containerRef}
     >
-      <div className="text-center mb-7">
-        <h1 className="text-3xl font-light tracking-wide" style={{ color: resumeData.colorHex }}>
-          {resumeData.firstName} {resumeData.lastName}
-        </h1>
-        <p className="text-md font-light">{resumeData.jobTitle}</p>
-        <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 mt-3 text-sm text-gray-600">
-          {resumeData.email && <span className="break-words">{resumeData.email}</span>}
-          {resumeData.phone && resumeData.email && <span className="hidden sm:inline">•</span>}
-          {resumeData.phone && <span className="break-words">{resumeData.phone}</span>}
-          {(resumeData.email || resumeData.phone) && (resumeData.city || resumeData.country) && <span className="hidden sm:inline">•</span>}
+      <div className="space-y-1 pb-2 border-b border-gray-200">
+        <h1 className="text-2xl font-bold">{resumeData.firstName} {resumeData.lastName}</h1>
+        
+        <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
+          {resumeData.email && (
+            <span className="inline-block">{resumeData.email}</span>
+          )}
+          
+          {resumeData.phone && resumeData.email && (
+            <span className="inline-block">•</span>
+          )}
+          
+          {resumeData.phone && (
+            <span className="inline-block">{resumeData.phone}</span>
+          )}
+          
+          {((resumeData.city || resumeData.country) && (resumeData.email || resumeData.phone)) && (
+            <span className="inline-block">•</span>
+          )}
+          
           {(resumeData.city || resumeData.country) && (
-            <span className="break-words">
+            <span className="inline-block">
               {resumeData.city}{resumeData.city && resumeData.country && ", "}{resumeData.country}
             </span>
           )}
@@ -293,19 +258,32 @@ function MinimalistTemplate({ resumeData }: { resumeData: ResumeValues }) {
       </div>
       
       {resumeData.summary && (
-        <div className="space-y-3">
-          <h2 className="text-md font-semibold uppercase tracking-wider" style={{ color: resumeData.colorHex }}>
-            Summary
-          </h2>
-          <div className="border-t border-gray-200 pt-3">
-            <p className="text-sm whitespace-pre-line leading-relaxed">{resumeData.summary}</p>
-          </div>
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold" style={{ color: colorHex }}>SUMMARY</h2>
+          <p className="text-sm whitespace-pre-line">{resumeData.summary}</p>
         </div>
       )}
       
-      <MinimalistWorkExperience resumeData={resumeData} />
-      <MinimalistEducation resumeData={resumeData} />
-      <MinimalistSkills resumeData={resumeData} />
+      {resumeData.workExperiences && resumeData.workExperiences.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-base font-semibold" style={{ color: colorHex }}>EXPERIENCE</h2>
+          <MinimalistWorkExperience resumeData={resumeData} />
+        </div>
+      )}
+      
+      {resumeData.educations && resumeData.educations.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-base font-semibold" style={{ color: colorHex }}>EDUCATION</h2>
+          <MinimalistEducation resumeData={resumeData} />
+        </div>
+      )}
+      
+      {resumeData.skills && resumeData.skills.length > 0 && (
+        <div className="space-y-2">
+          <h2 className="text-base font-semibold" style={{ color: colorHex }}>SKILLS</h2>
+          <MinimalistSkills resumeData={resumeData} />
+        </div>
+      )}
     </div>
   );
 }
