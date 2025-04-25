@@ -10,10 +10,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { EditorFormProps } from "@/lib/types";
 import { skillsSchema, SkillsValues } from "@/lib/validation";
+import { ResumeValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import isEqual from "lodash/isEqual";
+import debounce from "lodash/debounce";
 
 export default function SkillsForm({
   resumeData,
@@ -43,16 +45,21 @@ export default function SkillsForm({
     defaultValues,
   });
   
-  // Reset form when defaultValues change
+  // Reset form when defaultValues change FROM OUTSIDE (not from our own updates)
   useEffect(() => {
-    form.reset(defaultValues);
+    // Only reset if the incoming defaults really differ from what
+    // the user currently has in the form
+    if (!isEqual(defaultValues, form.getValues())) {
+      form.reset(defaultValues);
+    }
   }, [form, defaultValues]);
 
   useEffect(() => {
     console.log("🎯 useEffect watch triggered in SkillsForm");
     
-    const subscription = form.watch((values) => {
-      console.log("👀 Form values changed in SkillsForm:", values);
+    // Create a debounced version of the update function
+    const debouncedUpdate = debounce((values: any) => {
+      console.log("👀 Debounced form values update in SkillsForm");
       
       // Don't proceed if values are same as the last ones we processed
       if (prevFormValuesRef.current && isEqual(prevFormValuesRef.current, values)) {
@@ -65,57 +72,51 @@ export default function SkillsForm({
         skills: [] // Will be updated after processing
       };
       
-      // Validate the form
-      form.trigger().then(isValid => {
-        console.log("✅ Form validation result:", isValid);
-        if (!isValid) {
-          console.log("⏭️ Skipping update - form invalid");
-          return;
-        }
+      // Process skills to remove empty entries
+      const processedSkills = values.skills
+        ?.filter((skill: any): skill is string => skill !== undefined)
+        .map((skill: string) => skill.trim())
+        .filter((skill: string) => skill !== "") || [];
+      
+      // Update stored values with processed skills
+      prevFormValuesRef.current = { 
+        skills: processedSkills 
+      };
 
-        // Process skills to remove empty entries
-        const processedSkills = values.skills
-          ?.filter((skill): skill is string => skill !== undefined)
-          .map((skill) => skill.trim())
-          .filter((skill) => skill !== "") || [];
-        
-        // Update stored values with processed skills
-        prevFormValuesRef.current = { 
+      setResumeData((prevResumeData: ResumeValues) => {
+        const newData: ResumeValues = { 
+          ...prevResumeData, 
           skills: processedSkills 
         };
 
-        setResumeData((prevResumeData) => {
-          const newData = { 
-            ...prevResumeData, 
-            skills: processedSkills 
-          };
-
-          console.log("🧩 setResumeData called in SkillsForm");
-          
-          // Deep equality check to ensure we only update if there's an actual change
-          if (!isEqual(prevResumeData.skills, newData.skills)) {
-            console.log("✅ Data changed in SkillsForm, updating state");
-            return newData;
-          } else {
-            console.log("🚫 No data change detected in SkillsForm");
-            return prevResumeData;
-          }
-        });
+        console.log("🧩 setResumeData called in SkillsForm");
+        
+        // Deep equality check to ensure we only update if there's an actual change
+        if (!isEqual(prevResumeData.skills, newData.skills)) {
+          console.log("✅ Data changed in SkillsForm, updating state");
+          return newData;
+        } else {
+          console.log("🚫 No data change detected in SkillsForm");
+          return prevResumeData;
+        }
       });
+    }, 500); // 500ms debounce
+    
+    const subscription = form.watch((values) => {
+      console.log("👀 Form values changed in SkillsForm");
+      // Debounce the update to prevent focus issues
+      debouncedUpdate(values);
     });
 
     return () => {
       console.log("🧹 Cleaning up subscription in SkillsForm");
+      debouncedUpdate.cancel();
       subscription.unsubscribe();
     };
   }, [form, setResumeData]);
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <div className="space-y-1.5 text-center">
-        <h2 className="text-2xl font-semibold">Skills</h2>
-        <p className="text-sm text-muted-foreground">What are you good at?</p>
-      </div>
       <Form {...form}>
         <form className="space-y-3">
           <FormField
@@ -127,6 +128,8 @@ export default function SkillsForm({
                 <FormControl>
                   <Textarea
                     {...field}
+                    id="skills-textarea"
+                    key="skills-textarea"
                     placeholder="e.g. React.js, Node.js, graphic design, ..."
                     onChange={(e) => {
                       const skills = e.target.value.split(",");

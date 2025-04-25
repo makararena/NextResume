@@ -3,7 +3,8 @@ import { ResumeValues } from "./validation";
 
 export interface EditorFormProps {
   resumeData: ResumeValues;
-  setResumeData: (data: ResumeValues) => void;
+  setResumeData: (data: ResumeValues | ((prevData: ResumeValues) => ResumeValues)) => void;
+  hideTitle?: boolean;
 }
 
 export const resumeDataInclude = {

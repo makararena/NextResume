@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { EditorFormProps } from "@/lib/types";
-import { generalInfoSchema, GeneralInfoValues } from "@/lib/validation";
+import { generalInfoSchema, GeneralInfoValues, ResumeValues } from "@/lib/validation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
@@ -81,8 +81,8 @@ export default function GeneralInfoForm({
       // Store current values to prevent future duplicate processing
       prevFormValuesRef.current = { ...values };
 
-      setResumeData((prevResumeData) => {
-        const newData = { ...prevResumeData, ...values };
+      setResumeData((prevResumeData: ResumeValues) => {
+        const newData: ResumeValues = { ...prevResumeData, ...values };
 
         console.log("🧩 setResumeData called in GeneralInfoForm");
         console.log("Prev data:", prevResumeData);
@@ -108,12 +108,6 @@ export default function GeneralInfoForm({
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <div className="space-y-1.5 text-center">
-        <h2 className="text-2xl font-semibold">General info</h2>
-        <p className="text-sm text-muted-foreground">
-          This will not appear on your resume.
-        </p>
-      </div>
       <Form {...form}>
         <form className="space-y-3">
           <FormField

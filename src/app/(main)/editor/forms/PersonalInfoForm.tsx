@@ -269,10 +269,6 @@ export default function PersonalInfoForm({
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <div className="space-y-1.5 text-center">
-        <h2 className="text-2xl font-semibold">Personal info</h2>
-        <p className="text-sm text-muted-foreground">Tell us about yourself.</p>
-      </div>
       <Form {...form}>
         <form className="space-y-3">
           <FormField

@@ -36,7 +36,9 @@ import { GripHorizontal } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import isEqual from "lodash/isEqual";
+import debounce from "lodash/debounce";
 import GenerateWorkExperienceButton from "./GenerateWorkExperienceButton";
+import { ResumeValues } from "@/lib/validation";
 
 export default function WorkExperienceForm({
   resumeData,
@@ -76,16 +78,21 @@ export default function WorkExperienceForm({
     defaultValues,
   });
   
-  // Reset form when defaultValues change
+  // Reset form when defaultValues change FROM OUTSIDE (not from our own updates)
   useEffect(() => {
-    form.reset(defaultValues);
+    // Only reset if the incoming defaults really differ from what
+    // the user currently has in the form
+    if (!isEqual(defaultValues, form.getValues())) {
+      form.reset(defaultValues);
+    }
   }, [form, defaultValues]);
 
   useEffect(() => {
     console.log("🎯 useEffect watch triggered in WorkExperienceForm");
     
-    const subscription = form.watch((values) => {
-      console.log("👀 Form values changed in WorkExperienceForm:", values);
+    // Create a debounced version of the update function
+    const debouncedUpdate = debounce((values: any) => {
+      console.log("👀 Debounced form values update in WorkExperienceForm");
       
       // Don't proceed if values are same as the last ones we processed
       if (prevFormValuesRef.current && isEqual(prevFormValuesRef.current, values)) {
@@ -93,44 +100,42 @@ export default function WorkExperienceForm({
         return;
       }
       
-      // Validate the form
-      form.trigger().then(isValid => {
-        console.log("✅ Form validation result:", isValid);
-        if (!isValid) {
-          console.log("⏭️ Skipping update - form invalid");
-          return;
-        }
-        
-        // Process experiences to filter out undefined values
-        const processedExperiences = values.workExperiences?.filter((exp) => exp !== undefined) || [];
-        
-        // Store current values to prevent future duplicate processing
-        prevFormValuesRef.current = { 
-          workExperiences: processedExperiences 
+      // Process experiences to filter out undefined values
+      const processedExperiences = values.workExperiences?.filter((exp: any) => exp !== undefined) || [];
+      
+      // Store current values to prevent future duplicate processing
+      prevFormValuesRef.current = { 
+        workExperiences: processedExperiences 
+      };
+      
+      setResumeData((prevData: ResumeValues) => {
+        const newData = { 
+          ...prevData, 
+          workExperiences: processedExperiences
         };
         
-        setResumeData((prevData) => {
-          const newData = { 
-            ...prevData, 
-            workExperiences: processedExperiences
-          };
-          
-          console.log("🧩 setResumeData called in WorkExperienceForm");
-          
-          // Deep equality check to ensure we only update if there's an actual change
-          if (!isEqual(prevData.workExperiences, newData.workExperiences)) {
-            console.log("✅ Data changed in WorkExperienceForm, updating state");
-            return newData;
-          } else {
-            console.log("🚫 No data change detected in WorkExperienceForm");
-            return prevData;
-          }
-        });
+        console.log("🧩 setResumeData called in WorkExperienceForm");
+        
+        // Deep equality check to ensure we only update if there's an actual change
+        if (!isEqual(prevData.workExperiences, newData.workExperiences)) {
+          console.log("✅ Data changed in WorkExperienceForm, updating state");
+          return newData;
+        } else {
+          console.log("🚫 No data change detected in WorkExperienceForm");
+          return prevData;
+        }
       });
+    }, 500); // 500ms debounce
+    
+    const subscription = form.watch((values) => {
+      console.log("👀 Form values changed in WorkExperienceForm");
+      // Debounce the update to prevent focus issues
+      debouncedUpdate(values);
     });
 
     return () => {
       console.log("🧹 Cleaning up subscription in WorkExperienceForm");
+      debouncedUpdate.cancel();
       subscription.unsubscribe();
     };
   }, [form, setResumeData]);
@@ -182,12 +187,6 @@ export default function WorkExperienceForm({
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <div className="space-y-1.5 text-center">
-        <h2 className="text-2xl font-semibold">Work experience</h2>
-        <p className="text-sm text-muted-foreground">
-          Add as many work experiences as you like.
-        </p>
-      </div>
       <Form {...form}>
         <form className="space-y-3">
           <DndContext
@@ -259,6 +258,9 @@ function WorkExperienceItem({
   remove,
 }: WorkExperienceItemProps) {
   console.log(`🧩 Rendering WorkExperienceItem ${index + 1}`);
+  
+  // Track if we've already auto-focused this field
+  const hasAutoFocused = useRef(false);
 
   const {
     attributes,
@@ -267,7 +269,7 @@ function WorkExperienceItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id: id.toString() });
 
   // Safe handler for removing work experience
   const handleRemove = () => {
@@ -333,7 +335,13 @@ function WorkExperienceItem({
           <FormItem>
             <FormLabel>Job title</FormLabel>
             <FormControl>
-              <Input {...field} autoFocus={index === 0} />
+              <Input 
+                {...field} 
+                autoFocus={!hasAutoFocused.current && index === 0}
+                onFocus={() => {
+                  if (index === 0) hasAutoFocused.current = true;
+                }}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -407,6 +415,8 @@ function WorkExperienceItem({
             <FormControl>
               <Textarea
                 {...field}
+                id={`work-experience-description-${index}`}
+                key={`work-experience-description-${index}`}
                 className="min-h-[120px]"
                 placeholder="Describe your responsibilities and achievements..."
               />

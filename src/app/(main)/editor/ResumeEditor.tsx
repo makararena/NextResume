@@ -541,7 +541,7 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
         <div className="max-w-screen-xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:block">
             <div className={cn(
-              "w-full space-y-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6 print:hidden",
+              "w-full space-y-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6 print:hidden lg:max-h-[calc(100vh-12rem)] lg:overflow-auto",
               showSmResumePreview ? "hidden md:block" : "block"
             )}>
               <div className="flex items-center justify-between mb-4">
@@ -552,40 +552,44 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
               </div>
               
               {FormComponent && (
-                <FormComponent
-                  resumeData={resumeData}
-                  setResumeData={setResumeData}
-                />
+                <div className="form-container">
+                  <FormComponent
+                    resumeData={resumeData}
+                    setResumeData={setResumeData}
+                  />
+                </div>
               )}
                
               {/* Navigation buttons at the bottom of the form */}
-              <div className="flex justify-between mt-8 pt-4 border-t border-border sticky bottom-0 bg-card p-4 -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 rounded-b-lg">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={
-                    previousStep ? () => setStep(previousStep) : undefined
-                  }
-                  disabled={!previousStep}
-                  className="px-3 sm:px-5"
-                >
-                  <ArrowLeft className="mr-1 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                  <span className="text-xs sm:text-sm">Previous</span>
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={nextStep ? () => setStep(nextStep) : undefined}
-                  disabled={!nextStep}
-                  className="px-3 sm:px-6 bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  <span className="text-xs sm:text-sm">Next</span>
-                  <ArrowRight className="ml-1 sm:ml-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                </Button>
+              <div className="flex justify-between mt-8 sticky bottom-0 bg-card p-4 -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 rounded-b-lg shadow-sm border-t border-border/5">
+                <div className="w-full flex justify-between">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={
+                      previousStep ? () => setStep(previousStep) : undefined
+                    }
+                    disabled={!previousStep}
+                    className="px-3 sm:px-5"
+                  >
+                    <ArrowLeft className="mr-1 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                    <span className="text-xs sm:text-sm">Previous</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={nextStep ? () => setStep(nextStep) : undefined}
+                    disabled={!nextStep}
+                    className="px-3 sm:px-6 bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    <span className="text-xs sm:text-sm">Next</span>
+                    <ArrowRight className="ml-1 sm:ml-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
 
             <div className={cn(
-              "w-full bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6 print:shadow-none print:border-none print:p-0",
+              "w-full bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6 print:shadow-none print:border-none print:p-0 lg:h-[calc(100vh-10rem)] lg:max-h-full lg:sticky lg:top-24 lg:overflow-auto",
               showSmResumePreview ? "block" : "hidden lg:block"
             )}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 print:hidden gap-3">

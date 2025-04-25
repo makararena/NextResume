@@ -36,6 +36,8 @@ import { GripHorizontal } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { useFieldArray, useForm, UseFormReturn } from "react-hook-form";
 import isEqual from "lodash/isEqual";
+import debounce from "lodash/debounce";
+import { ResumeValues } from "@/lib/validation";
 
 export default function EducationForm({
   resumeData,
@@ -75,16 +77,21 @@ export default function EducationForm({
     defaultValues,
   });
   
-  // Reset form when defaultValues change
+  // Reset form when defaultValues change FROM OUTSIDE (not from our own updates)
   useEffect(() => {
-    form.reset(defaultValues);
+    // Only reset if the incoming defaults really differ from what
+    // the user currently has in the form
+    if (!isEqual(defaultValues, form.getValues())) {
+      form.reset(defaultValues);
+    }
   }, [form, defaultValues]);
 
   useEffect(() => {
     console.log("🎯 useEffect watch triggered in EducationForm");
     
-    const subscription = form.watch((values) => {
-      console.log("👀 Form values changed in EducationForm:", values);
+    // Create a debounced version of the update function
+    const debouncedUpdate = debounce((values: any) => {
+      console.log("👀 Debounced form values update in EducationForm");
       
       // Don't proceed if values are same as the last ones we processed
       if (prevFormValuesRef.current && isEqual(prevFormValuesRef.current, values)) {
@@ -92,44 +99,42 @@ export default function EducationForm({
         return;
       }
       
-      // Validate the form
-      form.trigger().then(isValid => {
-        console.log("✅ Form validation result:", isValid);
-        if (!isValid) {
-          console.log("⏭️ Skipping update - form invalid");
-          return;
-        }
-        
-        // Process educations to filter out undefined values
-        const processedEducations = values.educations?.filter((edu) => edu !== undefined) || [];
-        
-        // Store current values to prevent future duplicate processing
-        prevFormValuesRef.current = { 
-          educations: processedEducations 
+      // Process educations to filter out undefined values
+      const processedEducations = values.educations?.filter((edu: any) => edu !== undefined) || [];
+      
+      // Store current values to prevent future duplicate processing
+      prevFormValuesRef.current = { 
+        educations: processedEducations 
+      };
+      
+      setResumeData((prevData: ResumeValues) => {
+        const newData = { 
+          ...prevData, 
+          educations: processedEducations
         };
         
-        setResumeData((prevData) => {
-          const newData = { 
-            ...prevData, 
-            educations: processedEducations
-          };
-          
-          console.log("🧩 setResumeData called in EducationForm");
-          
-          // Deep equality check to ensure we only update if there's an actual change
-          if (!isEqual(prevData.educations, newData.educations)) {
-            console.log("✅ Data changed in EducationForm, updating state");
-            return newData;
-          } else {
-            console.log("🚫 No data change detected in EducationForm");
-            return prevData;
-          }
-        });
+        console.log("🧩 setResumeData called in EducationForm");
+        
+        // Deep equality check to ensure we only update if there's an actual change
+        if (!isEqual(prevData.educations, newData.educations)) {
+          console.log("✅ Data changed in EducationForm, updating state");
+          return newData;
+        } else {
+          console.log("🚫 No data change detected in EducationForm");
+          return prevData;
+        }
       });
+    }, 500); // 500ms debounce
+    
+    const subscription = form.watch((values) => {
+      console.log("👀 Form values changed in EducationForm");
+      // Debounce the update to prevent focus issues
+      debouncedUpdate(values);
     });
 
     return () => {
       console.log("🧹 Cleaning up subscription in EducationForm");
+      debouncedUpdate.cancel();
       subscription.unsubscribe();
     };
   }, [form, setResumeData]);
@@ -160,12 +165,6 @@ export default function EducationForm({
 
   return (
     <div className="mx-auto max-w-xl space-y-6">
-      <div className="space-y-1.5 text-center">
-        <h2 className="text-2xl font-semibold">Education</h2>
-        <p className="text-sm text-muted-foreground">
-          Add your educational background.
-        </p>
-      </div>
       <Form {...form}>
         <form className="space-y-3">
           <DndContext
@@ -234,6 +233,9 @@ function EducationItem({
   remove,
 }: EducationItemProps) {
   console.log(`🧩 Rendering EducationItem ${index + 1}`);
+  
+  // Track if we've already auto-focused this field
+  const hasAutoFocused = useRef(false);
 
   const {
     attributes,
@@ -242,7 +244,7 @@ function EducationItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id: id.toString() });
 
   // Safe handler for removing education
   const handleRemove = () => {
@@ -308,7 +310,14 @@ function EducationItem({
           <FormItem>
             <FormLabel>Degree / Certificate</FormLabel>
             <FormControl>
-              <Input {...field} autoFocus={index === 0} placeholder="e.g. Bachelor of Science in Computer Science" />
+              <Input 
+                {...field} 
+                autoFocus={!hasAutoFocused.current && index === 0}
+                onFocus={() => {
+                  if (index === 0) hasAutoFocused.current = true;
+                }}
+                placeholder="e.g. Bachelor of Science in Computer Science" 
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -381,6 +390,8 @@ function EducationItem({
             <FormControl>
               <Textarea
                 {...field}
+                id={`education-description-${index}`}
+                key={`education-description-${index}`}
                 className="min-h-[120px]"
                 placeholder="Describe your studies, achievements, etc."
               />
