@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { ResumeServerData } from "./types";
 import { ResumeValues } from "./validation";
+import { monitoring } from './monitoring';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -100,3 +101,50 @@ export function logMemoryUsage(label: string) {
     }
   }
 }
+
+/**
+ * Safe console logging utility that sanitizes sensitive data
+ * Use this instead of direct console.log to prevent leaking sensitive information
+ */
+export const safeConsole = {
+  log: (message: string, data?: any) => {
+    if (process.env.NODE_ENV !== 'production') {
+      monitoring.log({ message, level: 'debug', metadata: data });
+    }
+  },
+  
+  debug: (message: string, data?: any) => {
+    if (process.env.NODE_ENV !== 'production') {
+      monitoring.log({ message, level: 'debug', metadata: data });
+    }
+  },
+  
+  info: (message: string, data?: any) => {
+    monitoring.log({ message, level: 'info', metadata: data });
+  },
+  
+  warn: (message: string, data?: any) => {
+    monitoring.log({ message, level: 'warning', metadata: data });
+  },
+  
+  error: (message: string, error?: Error, metadata?: any) => {
+    if (error) {
+      monitoring.captureError(message, error, metadata);
+    } else {
+      monitoring.log({ message, level: 'error', metadata });
+    }
+  },
+  
+  // Performance timing utilities that only run in development
+  time: (label: string) => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.time(label);
+    }
+  },
+  
+  timeEnd: (label: string) => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.timeEnd(label);
+    }
+  }
+};

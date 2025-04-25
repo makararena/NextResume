@@ -6,7 +6,7 @@
 
 // Define types for better error handling
 type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
-type LogLevel = 'debug' | 'info' | 'warning' | 'error';
+type LogLevel = 'trace' | 'debug' | 'info' | 'warning' | 'error';
 
 interface ErrorDetails {
   message: string;
@@ -16,7 +16,7 @@ interface ErrorDetails {
   tags?: string[];
   user?: {
     id?: string;
-    email?: string;
+    // No longer storing email in logs for security
     [key: string]: any;
   };
 }
@@ -28,32 +28,95 @@ interface LogDetails {
   tags?: string[];
 }
 
+// List of fields that should never be logged
+const SENSITIVE_FIELDS = [
+  'password',
+  'token',
+  'secret',
+  'key',
+  'auth',
+  'jwt',
+  'email',
+  'phone',
+  'address',
+  'name',
+  'location',
+  'ssn',
+  'session',
+  'personal',
+  'credential',
+  'accessToken',
+  'refreshToken'
+];
+
 class EnhancedMonitoring {
   private isProduction = process.env.NODE_ENV === 'production';
   private sampleRate = 1.0; // 100% errors reported by default
+  private currentLogLevel: LogLevel = this.isProduction ? 'error' : 'trace';
+  
+  // Log level hierarchy for comparison
+  private logLevelHierarchy: Record<LogLevel, number> = {
+    'trace': 0,
+    'debug': 1,
+    'info': 2,
+    'warning': 3,
+    'error': 4
+  };
+  
+  /**
+   * Sanitizes objects to remove sensitive information before logging
+   */
+  private sanitizeData(data: any): any {
+    if (!data) return data;
+    
+    // For primitive types, return as is
+    if (typeof data !== 'object') return data;
+    
+    // Handle arrays
+    if (Array.isArray(data)) {
+      return data.map(item => this.sanitizeData(item));
+    }
+    
+    // Handle objects
+    const sanitized: Record<string, any> = {};
+    
+    for (const [key, value] of Object.entries(data)) {
+      // Check if the key contains sensitive information
+      const isSensitive = SENSITIVE_FIELDS.some(field => 
+        key.toLowerCase().includes(field.toLowerCase())
+      );
+      
+      if (isSensitive) {
+        sanitized[key] = typeof value === 'string' ? '[REDACTED]' : '[REDACTED_OBJECT]';
+      } else if (typeof value === 'object' && value !== null) {
+        sanitized[key] = this.sanitizeData(value);
+      } else {
+        sanitized[key] = value;
+      }
+    }
+    
+    return sanitized;
+  }
   
   /**
    * Captures error details with additional context
    * In production, this would integrate with an error monitoring service
    */
   captureError(name: string, error: Error, metadata?: Record<string, any>, severity: ErrorSeverity = 'medium') {
-    // Always log to console in development
-    if (!this.isProduction) {
-      console.error(`[Error] ${name}: ${error.message}`, { metadata, stack: error.stack });
-      return;
-    }
+    // Always log errors regardless of environment
+    const sanitizedMetadata = this.sanitizeData(metadata);
     
     // In production: rate limit error reporting to avoid overwhelming systems
-    if (Math.random() > this.sampleRate) return;
+    if (this.isProduction && Math.random() > this.sampleRate) return;
     
     // Structured error data for eventual external service
     const errorData = {
       name,
       message: error.message,
-      stack: error.stack,
+      stack: this.isProduction ? undefined : error.stack, // Only include stack in development
       severity,
       metadata: {
-        ...metadata,
+        ...sanitizedMetadata,
         timestamp: new Date().toISOString(),
         url: typeof window !== 'undefined' ? window.location.href : 'server',
         userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
@@ -67,7 +130,12 @@ class EnhancedMonitoring {
       console.error(JSON.stringify(errorData));
       
       // Placeholder for external service integration
-      // Example: Sentry.captureException(error, { extra: metadata });
+      // Example: Sentry.captureException(error, { extra: sanitizedMetadata });
+    } else {
+      console.error(`[Error] ${name}: ${error.message}`, { 
+        metadata: sanitizedMetadata, 
+        stack: error.stack 
+      });
     }
   }
   
@@ -82,12 +150,35 @@ class EnhancedMonitoring {
    * Log general information with structured format
    */
   log({ message, level = 'info', metadata, tags = [] }: LogDetails) {
-    if (!this.isProduction || level === 'error' || level === 'warning') {
-      const logFn = level === 'error' ? console.error : 
-                    level === 'warning' ? console.warn : console.log;
+    // Only log if the current log level is less than or equal to the message level
+    if (this.logLevelHierarchy[level] >= this.logLevelHierarchy[this.currentLogLevel]) {
+      const sanitizedMetadata = this.sanitizeData(metadata);
       
-      logFn(`[${level}] ${message}`, { metadata, tags, timestamp: new Date().toISOString() });
+      const logFn = level === 'error' ? console.error : 
+                   level === 'warning' ? console.warn : 
+                   level === 'info' ? console.info :
+                   console.log;
+      
+      logFn(`[${level}] ${message}`, { 
+        metadata: sanitizedMetadata, 
+        tags, 
+        timestamp: new Date().toISOString() 
+      });
     }
+  }
+  
+  /**
+   * Set the current log level
+   */
+  setLogLevel(level: LogLevel) {
+    this.currentLogLevel = level;
+  }
+  
+  /**
+   * Get the current log level
+   */
+  getLogLevel(): LogLevel {
+    return this.currentLogLevel;
   }
   
   /**
@@ -130,7 +221,29 @@ class EnhancedMonitoring {
   setSampleRate(rate: number) {
     this.sampleRate = Math.max(0, Math.min(1, rate));
   }
+  
+  /**
+   * Initialize the monitoring service
+   * Sets appropriate log level based on environment
+   */
+  initialize() {
+    // Set log level based on environment
+    if (this.isProduction) {
+      this.setLogLevel('error');
+    } else {
+      this.setLogLevel('trace');
+    }
+    
+    // Log initialization status
+    this.log({
+      message: `Monitoring initialized in ${this.isProduction ? 'production' : 'development'} mode with log level ${this.currentLogLevel}`,
+      level: 'info'
+    });
+  }
 }
 
 // Export a singleton instance
-export const monitoring = new EnhancedMonitoring(); 
+export const monitoring = new EnhancedMonitoring();
+
+// Initialize monitoring with appropriate settings
+monitoring.initialize(); 

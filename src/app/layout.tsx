@@ -31,7 +31,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      // For secure cookie settings, we rely on the middleware.ts configuration
+      // which already configures httpOnly, secure, and sameSite settings
+      appearance={{
+        baseTheme: undefined, // Use system theme
+      }}
+    >
       <html lang="en" suppressHydrationWarning>
         <head>
           <link rel="icon" href="/assets/NR-Icon.ico" />

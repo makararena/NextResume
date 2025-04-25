@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       mode: "subscription",
       billing_address_collection: "auto",
       success_url: `${baseUrl}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/dashboard?canceled=true`,
+      cancel_url: `${baseUrl}/dashboard`,
       metadata: {
         userId,
       },

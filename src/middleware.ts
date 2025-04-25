@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 /**
  * Enhanced middleware for Clerk authentication with additional security headers
  * Handles authentication, redirection, and sets security headers for production
  */
 export default clerkMiddleware({
+  // Define public routes that don't require authentication
   publicRoutes: [
     '/',
     '/sign-in(.*)',
@@ -22,6 +23,19 @@ export default clerkMiddleware({
     '/tos',
     '/_next/(.*)' // Make Next.js static files public
   ],
+  
+  // Clerk cookie options for secure token storage
+  cookieOptions: {
+    // Use secure cookies in production
+    secure: process.env.NODE_ENV === 'production',
+    // HttpOnly prevents JavaScript access to the cookie
+    httpOnly: true,
+    // SameSite helps prevent CSRF attacks
+    sameSite: 'lax',
+    // 7 day expiration (same as Clerk default)
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  },
+  
   afterAuth(authState, req) {
     // Get the response to modify it later
     const response = NextResponse.next();
