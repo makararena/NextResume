@@ -498,6 +498,21 @@ export default function Home() {
               </a>
             </div>
           </div>
+
+          {/* Added Naulichtis team information */}
+          <div className="mt-6 pt-6 border-t border-border text-center">
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} NextResume. Developed and controlled by the Naulichtis team.
+            </p>
+            <a 
+              href="https://www.naulichtis.online/" 
+              className="text-sm text-primary hover:underline mt-1 inline-block"
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              Learn more about Naulichtis
+            </a>
+          </div>
         </div>
       </footer>
     </div>

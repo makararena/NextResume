@@ -32,6 +32,7 @@ export default function ResumePreviewSection({
   const [baseScale, setBaseScale] = useState(0.5);
   const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   
   const handleZoomIn = () => {
     setScale(prevScale => Math.min(prevScale + 0.1, 1.5));
@@ -42,7 +43,7 @@ export default function ResumePreviewSection({
   };
   
   const handleResetZoom = () => {
-    setScale(baseScale);
+    setScale(0.61);
   };
   
   // Calculate available height and determine if mobile
@@ -106,9 +107,25 @@ export default function ResumePreviewSection({
     };
   }, []);
   
+  // Center the resume when component is ready
   useEffect(() => {
     console.log("⚡ Setting isReady to true");
     setIsReady(true);
+    
+    // Center the resume after it's rendered
+    setTimeout(() => {
+      if (scrollContainerRef.current) {
+        const container = scrollContainerRef.current;
+        const contentWidth = container.scrollWidth;
+        const contentHeight = container.scrollHeight;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        
+        // Scroll to center
+        container.scrollLeft = (contentWidth - containerWidth) / 2;
+        container.scrollTop = (contentHeight - containerHeight) / 2; // Start at top but centered horizontally
+      }
+    }, 100);
   }, []);
 
   // Log data size as this might be causing performance issues
@@ -183,16 +200,20 @@ export default function ResumePreviewSection({
       <div
         className="w-full h-full bg-muted overflow-auto rounded-lg p-4 print:rounded-none print:p-0 print:bg-white print:overflow-visible"
         style={{ height: `${containerHeight}px` }}
+        ref={scrollContainerRef}
       >
         {isReady && (
           <div
-            className="resume-preview-container"
+            className="resume-preview-container flex justify-center"
             style={{
               transform: `scale(${scale})`,
               transformOrigin: 'center',
               margin: '50px auto',
               width: 'fit-content',
-              padding: `${50 * scale}px`
+              padding: `${50 * scale}px`,
+              minHeight: '100%',
+              display: 'flex',
+              justifyContent: 'center'
             }}
           >
             <ResumePreview
