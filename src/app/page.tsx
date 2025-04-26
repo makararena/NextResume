@@ -110,7 +110,7 @@ export default function Home() {
               </h1>
             </div>
             <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Built to overcome ATS filters and algorithms. Our solution helps you secure interviews your qualifications deserve.
+              Most resumes are rejected by hiring software before a human ever sees them. NextResume rewrites your resume to beat the filters and get you more interviews.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
