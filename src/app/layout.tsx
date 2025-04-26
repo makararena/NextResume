@@ -8,6 +8,7 @@ import "./globals.css";
 import "../styles/print.css";
 import ClientErrorBoundary from "@/components/ClientErrorBoundary";
 import DevTools from "@/components/test/DevTools";
+import { FeedbackButton } from "@/components/FeedbackButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -51,6 +52,7 @@ export default function RootLayout({
           >
             <ClientErrorBoundary>
               {children}
+              <FeedbackButton />
             </ClientErrorBoundary>
             <Toaster />
             <SonnerToaster position="top-right" />

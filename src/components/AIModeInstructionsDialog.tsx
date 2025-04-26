@@ -97,13 +97,21 @@ export function AIModeInstructionsDialog({
   const handleScroll = React.useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
+    
     const { scrollTop, scrollHeight, clientHeight } = container;
-    const scrollPercent = scrollTop / (scrollHeight - clientHeight);
-    const stepIndex = Math.min(
-      Math.floor(scrollPercent * steps.length),
+    
+    // Improved algorithm to better determine which step is visible
+    // Get step height
+    const stepHeight = scrollHeight / steps.length;
+    
+    // Calculate which step is most visible in the viewport
+    // Add half a step height to make the detection more centered on the visible content
+    const currentStepIndex = Math.min(
+      Math.floor((scrollTop + (stepHeight / 2)) / stepHeight),
       steps.length - 1
     );
-    setActiveStep(stepIndex + 1);
+    
+    setActiveStep(currentStepIndex + 1);
   }, [steps.length]);
 
   // When dialog opens, reset scroll and recalc step
