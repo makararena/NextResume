@@ -142,7 +142,7 @@ export default function DashboardPage() {
           variant="ghost" 
           size="sm" 
           className="flex items-center text-muted-foreground hover:text-foreground" 
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/resumes")}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
@@ -164,7 +164,7 @@ export default function DashboardPage() {
               <div className="flex flex-col space-y-1.5">
                 <CardTitle className="text-2xl font-bold">Free Plan</CardTitle>
                 <CardDescription className="text-base">
-                Create your resume with basic features and get started quickly.
+                Create and edit your resume with essential features — perfect for getting started quickly and easily.
                 </CardDescription>
               </div>
             </CardHeader>

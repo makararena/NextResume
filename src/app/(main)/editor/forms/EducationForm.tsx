@@ -54,6 +54,8 @@ export default function EducationForm({
   
   // Store previous form values to prevent unnecessary updates
   const prevFormValuesRef = useRef<EducationValues | null>(null);
+  // Track currently focused element
+  const activeElementRef = useRef<Element | null>(null);
 
   const defaultValues = useMemo(() => {
     console.log("🧩 Calculating defaultValues for EducationForm");
@@ -86,6 +88,20 @@ export default function EducationForm({
     }
   }, [form, defaultValues]);
 
+  // Save active element before updates to restore focus later
+  useEffect(() => {
+    const saveActiveElement = () => {
+      activeElementRef.current = document.activeElement;
+    };
+
+    // Add event listeners to capture the active element before blur
+    document.addEventListener('focusin', saveActiveElement);
+    
+    return () => {
+      document.removeEventListener('focusin', saveActiveElement);
+    };
+  }, []);
+
   useEffect(() => {
     console.log("🎯 useEffect watch triggered in EducationForm");
     
@@ -99,12 +115,25 @@ export default function EducationForm({
         return;
       }
       
-      // Process educations to filter out undefined values
-      const processedEducations = values.educations?.filter((edu: any) => edu !== undefined) || [];
+      // Store active element before update
+      const activeElement = activeElementRef.current;
+      const activeId = activeElement instanceof HTMLElement ? activeElement.id : null;
+      
+      // Process educations to ensure clean data 
+      const processedEducations = values.educations
+        ?.filter((edu: any) => edu !== undefined)
+        .map((edu: any) => ({
+          ...edu,
+          degree: edu.degree?.trim() || "",
+          institution: edu.institution?.trim() || "",
+          description: edu.description?.trim() || "",
+          startDate: edu.startDate || "",
+          endDate: edu.endDate || ""
+        })) || [];
       
       // Store current values to prevent future duplicate processing
       prevFormValuesRef.current = { 
-        educations: processedEducations 
+        educations: JSON.parse(JSON.stringify(processedEducations))
       };
       
       setResumeData((prevData: ResumeValues) => {
@@ -115,16 +144,21 @@ export default function EducationForm({
         
         console.log("🧩 setResumeData called in EducationForm");
         
-        // Deep equality check to ensure we only update if there's an actual change
-        if (!isEqual(prevData.educations, newData.educations)) {
-          console.log("✅ Data changed in EducationForm, updating state");
-          return newData;
-        } else {
-          console.log("🚫 No data change detected in EducationForm");
-          return prevData;
-        }
+        // Always update state when form data changes rather than doing deep equality check
+        // This ensures autosave is triggered properly
+        return newData;
       });
-    }, 500); // 500ms debounce
+      
+      // Restore focus after state update using a small delay
+      setTimeout(() => {
+        if (activeId) {
+          const elementToFocus = document.getElementById(activeId);
+          if (elementToFocus && elementToFocus instanceof HTMLElement) {
+            elementToFocus.focus();
+          }
+        }
+      }, 10);
+    }, 300); // Shorter debounce time for better responsiveness
     
     const subscription = form.watch((values) => {
       console.log("👀 Form values changed in EducationForm");
@@ -174,7 +208,7 @@ export default function EducationForm({
             modifiers={[restrictToVerticalAxis]}
           >
             <SortableContext
-              items={fields}
+              items={fields.map(field => field.fieldId)}
               strategy={verticalListSortingStrategy}
             >
               {fields.map((field, index) => (
@@ -244,7 +278,7 @@ function EducationItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: id.toString() });
+  } = useSortable({ id });
 
   // Safe handler for removing education
   const handleRemove = () => {
@@ -308,15 +342,15 @@ function EducationItem({
         name={`educations.${index}.degree`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Degree / Certificate</FormLabel>
+            <FormLabel>Degree</FormLabel>
             <FormControl>
               <Input 
                 {...field} 
+                id={`education-degree-${index}`}
                 autoFocus={!hasAutoFocused.current && index === 0}
                 onFocus={() => {
                   if (index === 0) hasAutoFocused.current = true;
                 }}
-                placeholder="e.g. Bachelor of Science in Computer Science" 
               />
             </FormControl>
             <FormMessage />
@@ -328,9 +362,9 @@ function EducationItem({
         name={`educations.${index}.school`}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>School / University</FormLabel>
+            <FormLabel>School</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="e.g. Stanford University" />
+              <Input {...field} id={`education-school-${index}`} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -346,6 +380,7 @@ function EducationItem({
               <FormControl>
                 <Input
                   {...field}
+                  id={`education-startDate-${index}`}
                   type="date"
                   value={getDateValue(field.value)}
                   onChange={(e) => {
@@ -366,6 +401,7 @@ function EducationItem({
               <FormControl>
                 <Input
                   {...field}
+                  id={`education-endDate-${index}`}
                   type="date"
                   value={getDateValue(field.value)}
                   onChange={(e) => {
@@ -379,7 +415,8 @@ function EducationItem({
         />
       </div>
       <FormDescription>
-        Leave <span className="font-semibold">end date</span> empty if this is your current education.
+        Leave <span className="font-semibold">end date</span> empty if you are
+        currently studying here.
       </FormDescription>
       <FormField
         control={form.control}
@@ -391,9 +428,8 @@ function EducationItem({
               <Textarea
                 {...field}
                 id={`education-description-${index}`}
-                key={`education-description-${index}`}
-                className="min-h-[120px]"
-                placeholder="Describe your studies, achievements, etc."
+                className="min-h-[180px]"
+                placeholder="Describe your coursework and achievements..."
               />
             </FormControl>
             <FormMessage />

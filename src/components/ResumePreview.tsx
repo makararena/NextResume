@@ -657,9 +657,6 @@ function MinimalistWorkExperience({ resumeData }: ResumeSectionProps) {
   
   return (
     <div className="space-y-3">
-      <h2 className="text-md font-semibold uppercase tracking-wider" style={{ color: colorHex }}>
-        Experience
-      </h2>
       <div className="border-t border-gray-200 pt-3 space-y-5">
         {workExperiencesNotEmpty.map((exp, index) => (
           <div key={index} className="break-inside-avoid">
@@ -694,9 +691,6 @@ function MinimalistEducation({ resumeData }: ResumeSectionProps) {
   
   return (
     <div className="space-y-2">
-      <h2 className="text-md font-semibold uppercase tracking-wider" style={{ color: colorHex }}>
-        Education
-      </h2>
       <div className="border-t border-gray-200 pt-2 space-y-4">
         {educationsNotEmpty.map((edu, index) => (
           <div key={index} className="break-inside-avoid">
@@ -727,9 +721,6 @@ function MinimalistSkills({ resumeData }: ResumeSectionProps) {
   
   return (
     <div className="space-y-2">
-      <h2 className="text-md font-semibold uppercase tracking-wider" style={{ color: colorHex }}>
-        Skills
-      </h2>
       <div className="border-t border-gray-200 pt-3">
         <div className="flex flex-wrap gap-2">
           {skills.map((skill, index) => (

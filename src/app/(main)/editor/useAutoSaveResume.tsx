@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, useMemo } from "react";
 import { saveResume } from "./actions";
 import isEqual from "lodash/isEqual";
+import cloneDeep from "lodash/cloneDeep";
 
 export default function useAutoSaveResume(resumeData: ResumeValues) {
   console.log("🔄 useAutoSaveResume hook initialized");
@@ -15,59 +16,60 @@ export default function useAutoSaveResume(resumeData: ResumeValues) {
   
   // Track if this is first render to avoid unnecessary saves on mount
   const isFirstRender = useRef(true);
+  const saveInProgressRef = useRef(false);
+  const activeElementBeforeSaveRef = useRef<Element | null>(null);
   
-  // Track previous resume data to avoid unnecessary debounces
-  const prevResumeDataRef = useRef<ResumeValues | null>(null);
-  
-  // Only debounce if data has actually changed
-  const debouncedResumeData = useDebounce(
-    useMemo(() => {
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        return resumeData;
-      }
-      
-      if (prevResumeDataRef.current && 
-          JSON.stringify(prevResumeDataRef.current) === JSON.stringify(resumeData)) {
-        console.log("🔄 Resume data unchanged, reusing previous data for debounce");
-        return prevResumeDataRef.current;
-      }
-      
-      console.log("🔄 Resume data changed, updating debounce input");
-      prevResumeDataRef.current = resumeData;
-      return resumeData;
-    }, [resumeData]),
-    1500
-  );
+  // Use a more reliable debounce with increased delay for complex forms
+  const debouncedResumeData = useDebounce(resumeData, 2000);
 
   const [resumeId, setResumeId] = useState(resumeData.id);
-
-  const [lastSavedData, setLastSavedData] = useState(
-    structuredClone(resumeData),
+  const [lastSavedData, setLastSavedData] = useState<ResumeValues>(() => 
+    cloneDeep(resumeData)
   );
-
   const [isSaving, setIsSaving] = useState(false);
   const [isError, setIsError] = useState(false);
 
+  // Reset error state when data changes
   useEffect(() => {
     setIsError(false);
   }, [debouncedResumeData]);
 
+  // Main save logic
   useEffect(() => {
-    // Skip effect on first render
+    // Skip the first render to avoid saving unchanged data on mount
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
     
+    // Skip if already saving
+    if (saveInProgressRef.current) {
+      return;
+    }
+    
     async function save() {
+      if (saveInProgressRef.current) return;
+      saveInProgressRef.current = true;
+      
+      // Store active element before saving
+      activeElementBeforeSaveRef.current = document.activeElement;
+      
       try {
         console.time("⏱️ Auto-saving resume");
         console.log("🔄 Starting auto-save process");
         setIsSaving(true);
         setIsError(false);
 
-        const newData = structuredClone(debouncedResumeData);
+        const newData = cloneDeep(debouncedResumeData);
+        
+        // For work experience items, ensure descriptions are properly trimmed
+        if (newData.workExperiences) {
+          newData.workExperiences = newData.workExperiences.map(exp => ({
+            ...exp,
+            description: exp.description?.trim() || ""
+          }));
+        }
+
         console.log("📦 Preparing data for save");
 
         console.time("⏱️ saveResume server action");
@@ -83,7 +85,7 @@ export default function useAutoSaveResume(resumeData: ResumeValues) {
 
         console.log("✅ Resume saved successfully, ID:", updatedResume.id);
         setResumeId(updatedResume.id);
-        setLastSavedData(newData);
+        setLastSavedData(cloneDeep(newData));
 
         if (searchParams.get("resumeId") !== updatedResume.id) {
           console.log("🔄 Updating URL with new resumeId");
@@ -109,6 +111,7 @@ export default function useAutoSaveResume(resumeData: ResumeValues) {
                 variant="secondary"
                 onClick={() => {
                   dismiss();
+                  saveInProgressRef.current = false;
                   save();
                 }}
               >
@@ -119,26 +122,30 @@ export default function useAutoSaveResume(resumeData: ResumeValues) {
         });
       } finally {
         setIsSaving(false);
+        
+        // Restore focus to the element that was active before saving
+        setTimeout(() => {
+          if (activeElementBeforeSaveRef.current instanceof HTMLElement) {
+            try {
+              activeElementBeforeSaveRef.current.focus();
+            } catch (e) {
+              console.warn("Could not restore focus after save:", e);
+            }
+          }
+          
+          // Allow another save after a short delay
+          setTimeout(() => {
+            saveInProgressRef.current = false;
+          }, 500);
+        }, 10);
       }
     }
 
-    console.log(
-      "🔍 Checking if save is needed - debouncedResumeData vs lastSavedData",
-    );
-    
-    // Measure object sizes to see if there's any huge data
-    console.log("📊 Data size - debouncedResumeData length:", 
-      JSON.stringify(debouncedResumeData, fileReplacer).length);
-    console.log("📊 Data size - lastSavedData length:", 
-      JSON.stringify(lastSavedData, fileReplacer).length);
-
-    // More reliable deep comparison using lodash isEqual
+    // Check if there are unsaved changes
     const hasUnsavedChanges = !isEqual(
       JSON.parse(JSON.stringify(debouncedResumeData, fileReplacer)),
       JSON.parse(JSON.stringify(lastSavedData, fileReplacer))
     );
-
-    console.log("🔄 hasUnsavedChanges:", hasUnsavedChanges, "isSaving:", isSaving, "isError:", isError);
 
     if (hasUnsavedChanges && debouncedResumeData && !isSaving && !isError) {
       console.log("🔄 Changes detected, triggering save");
@@ -154,12 +161,12 @@ export default function useAutoSaveResume(resumeData: ResumeValues) {
     toast,
   ]);
 
-  // Use memo to prevent unnecessary recalculations of hasUnsavedChanges
-  const result = useMemo(() => ({
+  // Return a memoized result to avoid unnecessary renders
+  return useMemo(() => ({
     isSaving,
-    hasUnsavedChanges:
-      JSON.stringify(resumeData, fileReplacer) !== JSON.stringify(lastSavedData, fileReplacer),
+    hasUnsavedChanges: !isEqual(
+      JSON.parse(JSON.stringify(resumeData, fileReplacer)),
+      JSON.parse(JSON.stringify(lastSavedData, fileReplacer))
+    )
   }), [isSaving, resumeData, lastSavedData]);
-  
-  return result;
 }

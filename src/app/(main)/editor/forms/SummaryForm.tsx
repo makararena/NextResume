@@ -31,6 +31,8 @@ export default function SummaryForm({
   
   // Store previous form values to prevent unnecessary updates
   const prevFormValuesRef = useRef<SummaryValues | null>(null);
+  // Track currently focused element
+  const activeElementRef = useRef<Element | null>(null);
 
   const defaultValues = useMemo(() => {
     console.log("🧩 Calculating defaultValues for SummaryForm");
@@ -53,6 +55,20 @@ export default function SummaryForm({
     }
   }, [form, defaultValues]);
 
+  // Save active element before updates to restore focus later
+  useEffect(() => {
+    const saveActiveElement = () => {
+      activeElementRef.current = document.activeElement;
+    };
+
+    // Add event listeners to capture the active element before blur
+    document.addEventListener('focusin', saveActiveElement);
+    
+    return () => {
+      document.removeEventListener('focusin', saveActiveElement);
+    };
+  }, []);
+
   useEffect(() => {
     console.log("🎯 useEffect watch triggered in SummaryForm");
     
@@ -66,24 +82,41 @@ export default function SummaryForm({
         return;
       }
 
+      // Store active element before update
+      const activeElement = activeElementRef.current;
+      const activeId = activeElement instanceof HTMLElement ? activeElement.id : null;
+
+      // Clean up the summary value
+      const processedValues = {
+        summary: values.summary?.trim() || ""
+      };
+
       // Store current values to prevent future duplicate processing
-      prevFormValuesRef.current = { ...values };
+      prevFormValuesRef.current = JSON.parse(JSON.stringify(processedValues));
       
       setResumeData((prevResumeData: ResumeValues) => {
-        const newData: ResumeValues = { ...prevResumeData, ...values };
+        const newData: ResumeValues = { 
+          ...prevResumeData, 
+          ...processedValues 
+        };
 
         console.log("🧩 setResumeData called in SummaryForm");
         
-        // Deep equality check to ensure we only update if there's an actual change
-        if (!isEqual(prevResumeData.summary, newData.summary)) {
-          console.log("✅ Data changed in SummaryForm, updating state");
-          return newData;
-        } else {
-          console.log("🚫 No data change detected in SummaryForm");
-          return prevResumeData;
-        }
+        // Always update state when form data changes
+        // This ensures autosave is triggered properly
+        return newData;
       });
-    }, 500); // 500ms debounce
+      
+      // Restore focus after state update using a small delay
+      setTimeout(() => {
+        if (activeId) {
+          const elementToFocus = document.getElementById(activeId);
+          if (elementToFocus && elementToFocus instanceof HTMLElement) {
+            elementToFocus.focus();
+          }
+        }
+      }, 10);
+    }, 300); // Shorter debounce time for better responsiveness
     
     const subscription = form.watch((values) => {
       console.log("👀 Form values changed in SummaryForm");

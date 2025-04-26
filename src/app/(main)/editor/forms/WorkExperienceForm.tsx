@@ -55,6 +55,8 @@ export default function WorkExperienceForm({
   
   // Store previous form values to prevent unnecessary updates
   const prevFormValuesRef = useRef<WorkExperienceValues | null>(null);
+  // Track currently focused element
+  const activeElementRef = useRef<Element | null>(null);
 
   const defaultValues = useMemo(() => {
     console.log("🧩 Calculating defaultValues for WorkExperienceForm");
@@ -87,6 +89,20 @@ export default function WorkExperienceForm({
     }
   }, [form, defaultValues]);
 
+  // Save active element before updates to restore focus later
+  useEffect(() => {
+    const saveActiveElement = () => {
+      activeElementRef.current = document.activeElement;
+    };
+
+    // Add event listeners to capture the active element before blur
+    document.addEventListener('focusin', saveActiveElement);
+    
+    return () => {
+      document.removeEventListener('focusin', saveActiveElement);
+    };
+  }, []);
+
   useEffect(() => {
     console.log("🎯 useEffect watch triggered in WorkExperienceForm");
     
@@ -99,33 +115,51 @@ export default function WorkExperienceForm({
         console.log("⏭️ Skipping update - values identical to last processed values");
         return;
       }
+
+      // Store active element before update
+      const activeElement = activeElementRef.current;
+      const activeId = activeElement instanceof HTMLElement ? activeElement.id : null;
       
-      // Process experiences to filter out undefined values
-      const processedExperiences = values.workExperiences?.filter((exp: any) => exp !== undefined) || [];
+      // Process work experiences to ensure clean data 
+      const processedWorkExperiences = values.workExperiences
+        ?.filter((exp: any) => exp !== undefined)
+        .map((exp: any) => ({
+          ...exp,
+          position: exp.position?.trim() || "",
+          company: exp.company?.trim() || "",
+          description: exp.description?.trim() || "",
+          startDate: exp.startDate || "",
+          endDate: exp.endDate || ""
+        })) || [];
       
       // Store current values to prevent future duplicate processing
       prevFormValuesRef.current = { 
-        workExperiences: processedExperiences 
+        workExperiences: JSON.parse(JSON.stringify(processedWorkExperiences))
       };
       
       setResumeData((prevData: ResumeValues) => {
         const newData = { 
           ...prevData, 
-          workExperiences: processedExperiences
+          workExperiences: processedWorkExperiences
         };
         
         console.log("🧩 setResumeData called in WorkExperienceForm");
         
-        // Deep equality check to ensure we only update if there's an actual change
-        if (!isEqual(prevData.workExperiences, newData.workExperiences)) {
-          console.log("✅ Data changed in WorkExperienceForm, updating state");
-          return newData;
-        } else {
-          console.log("🚫 No data change detected in WorkExperienceForm");
-          return prevData;
-        }
+        // Always update state when form data changes rather than doing deep equality check
+        // This ensures autosave is triggered properly
+        return newData;
       });
-    }, 500); // 500ms debounce
+
+      // Restore focus after state update using a small delay
+      setTimeout(() => {
+        if (activeId) {
+          const elementToFocus = document.getElementById(activeId);
+          if (elementToFocus && elementToFocus instanceof HTMLElement) {
+            elementToFocus.focus();
+          }
+        }
+      }, 10);
+    }, 300); // Shorter debounce time for better responsiveness
     
     const subscription = form.watch((values) => {
       console.log("👀 Form values changed in WorkExperienceForm");
@@ -196,7 +230,7 @@ export default function WorkExperienceForm({
             modifiers={[restrictToVerticalAxis]}
           >
             <SortableContext
-              items={fields}
+              items={fields.map(field => field.fieldId)}
               strategy={verticalListSortingStrategy}
             >
               {fields.map((field, index) => (
@@ -269,7 +303,7 @@ function WorkExperienceItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: id.toString() });
+  } = useSortable({ id });
 
   // Safe handler for removing work experience
   const handleRemove = () => {
@@ -337,6 +371,7 @@ function WorkExperienceItem({
             <FormControl>
               <Input 
                 {...field} 
+                id={`work-experience-position-${index}`}
                 autoFocus={!hasAutoFocused.current && index === 0}
                 onFocus={() => {
                   if (index === 0) hasAutoFocused.current = true;
@@ -354,7 +389,7 @@ function WorkExperienceItem({
           <FormItem>
             <FormLabel>Company</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} id={`work-experience-company-${index}`} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -370,6 +405,7 @@ function WorkExperienceItem({
               <FormControl>
                 <Input
                   {...field}
+                  id={`work-experience-startDate-${index}`}
                   type="date"
                   value={getDateValue(field.value)}
                   onChange={(e) => {
@@ -390,6 +426,7 @@ function WorkExperienceItem({
               <FormControl>
                 <Input
                   {...field}
+                  id={`work-experience-endDate-${index}`}
                   type="date"
                   value={getDateValue(field.value)}
                   onChange={(e) => {
@@ -417,7 +454,7 @@ function WorkExperienceItem({
                 {...field}
                 id={`work-experience-description-${index}`}
                 key={`work-experience-description-${index}`}
-                className="min-h-[120px]"
+                className="min-h-[180px]"
                 placeholder="Describe your responsibilities and achievements..."
               />
             </FormControl>

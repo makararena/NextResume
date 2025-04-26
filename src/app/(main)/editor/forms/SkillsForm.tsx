@@ -32,6 +32,8 @@ export default function SkillsForm({
   
   // Store previous form values to prevent unnecessary updates
   const prevFormValuesRef = useRef<SkillsValues | null>(null);
+  // Track currently focused element
+  const activeElementRef = useRef<Element | null>(null);
 
   const defaultValues = useMemo(() => {
     console.log("🧩 Calculating defaultValues for SkillsForm");
@@ -54,6 +56,20 @@ export default function SkillsForm({
     }
   }, [form, defaultValues]);
 
+  // Save active element before updates to restore focus later
+  useEffect(() => {
+    const saveActiveElement = () => {
+      activeElementRef.current = document.activeElement;
+    };
+
+    // Add event listeners to capture the active element before blur
+    document.addEventListener('focusin', saveActiveElement);
+    
+    return () => {
+      document.removeEventListener('focusin', saveActiveElement);
+    };
+  }, []);
+
   useEffect(() => {
     console.log("🎯 useEffect watch triggered in SkillsForm");
     
@@ -66,22 +82,24 @@ export default function SkillsForm({
         console.log("⏭️ Skipping update - values identical to last processed values");
         return;
       }
-
-      // Store current values to prevent future duplicate processing
-      prevFormValuesRef.current = { 
-        skills: [] // Will be updated after processing
-      };
+      
+      // Store active element before update
+      const activeElement = activeElementRef.current;
+      const activeId = activeElement instanceof HTMLElement ? activeElement.id : null;
       
       // Process skills to remove empty entries
       const processedSkills = values.skills
-        ?.filter((skill: any): skill is string => skill !== undefined)
+        ?.filter((skill: any): skill is string => 
+          skill !== undefined && typeof skill === 'string')
         .map((skill: string) => skill.trim())
         .filter((skill: string) => skill !== "") || [];
       
-      // Update stored values with processed skills
-      prevFormValuesRef.current = { 
+      const processedValues = { 
         skills: processedSkills 
       };
+      
+      // Store current values to prevent future duplicate processing
+      prevFormValuesRef.current = JSON.parse(JSON.stringify(processedValues));
 
       setResumeData((prevResumeData: ResumeValues) => {
         const newData: ResumeValues = { 
@@ -91,16 +109,21 @@ export default function SkillsForm({
 
         console.log("🧩 setResumeData called in SkillsForm");
         
-        // Deep equality check to ensure we only update if there's an actual change
-        if (!isEqual(prevResumeData.skills, newData.skills)) {
-          console.log("✅ Data changed in SkillsForm, updating state");
-          return newData;
-        } else {
-          console.log("🚫 No data change detected in SkillsForm");
-          return prevResumeData;
-        }
+        // Always update state when form data changes
+        // This ensures autosave is triggered properly
+        return newData;
       });
-    }, 500); // 500ms debounce
+      
+      // Restore focus after state update using a small delay
+      setTimeout(() => {
+        if (activeId) {
+          const elementToFocus = document.getElementById(activeId);
+          if (elementToFocus && elementToFocus instanceof HTMLElement) {
+            elementToFocus.focus();
+          }
+        }
+      }, 10);
+    }, 300); // Shorter debounce time for better responsiveness
     
     const subscription = form.watch((values) => {
       console.log("👀 Form values changed in SkillsForm");

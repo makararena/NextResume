@@ -541,49 +541,67 @@ export default function ResumeEditor({ resumeToEdit }: ResumeEditorProps) {
         <div className="max-w-screen-xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:block">
             <div className={cn(
-              "w-full space-y-6 bg-card border border-border rounded-lg shadow-sm p-4 sm:p-6 print:hidden lg:max-h-[calc(100vh-12rem)] lg:overflow-auto",
+              "w-full bg-card border border-border rounded-lg shadow-sm print:hidden",
               showSmResumePreview ? "hidden md:block" : "block"
             )}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg sm:text-xl font-semibold">{steps[currentStepIndex]?.title}</h2>
-                <Badge variant="outline" className="text-xs text-muted-foreground bg-muted">
-                  {activeTemplate.charAt(0).toUpperCase() + activeTemplate.slice(1)} Template
-                </Badge>
-              </div>
-              
-              {FormComponent && (
-                <div className="form-container">
-                  <FormComponent
-                    resumeData={resumeData}
-                    setResumeData={setResumeData}
-                  />
+              {/* Single container with flex column layout */}
+              <div className="flex flex-col h-[calc(100vh-12rem)]">
+
+                {/* Fixed header with title and badge */}
+                <div className="p-4 sm:p-6 border-b border-border/50">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg sm:text-xl font-semibold">{steps[currentStepIndex]?.title}</h2>
+                    <Badge variant="outline" className="text-xs text-muted-foreground bg-muted">
+                      {activeTemplate.charAt(0).toUpperCase() + activeTemplate.slice(1)} Template
+                    </Badge>
+                  </div>
                 </div>
-              )}
-               
-              {/* Navigation buttons at the bottom of the form */}
-              <div className="flex justify-between mt-8 sticky bottom-0 bg-card p-4 -mx-4 sm:-mx-6 -mb-4 sm:-mb-6 rounded-b-lg shadow-sm border-t border-border/5">
-                <div className="w-full flex justify-between">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={
-                      previousStep ? () => setStep(previousStep) : undefined
-                    }
-                    disabled={!previousStep}
-                    className="px-3 sm:px-5"
-                  >
-                    <ArrowLeft className="mr-1 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                    <span className="text-xs sm:text-sm">Previous</span>
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={nextStep ? () => setStep(nextStep) : undefined}
-                    disabled={!nextStep}
-                    className="px-3 sm:px-6 bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    <span className="text-xs sm:text-sm">Next</span>
-                    <ArrowRight className="ml-1 sm:ml-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
-                  </Button>
+
+                {/* Scrollable Form - Only this section scrolls */}
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-3 sm:pt-5">
+                  <div className="space-y-6 pb-4">
+                    {FormComponent && (
+                      <FormComponent
+                        resumeData={resumeData}
+                        setResumeData={setResumeData}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Fixed footer for navigation - with improved visual separation */}
+                <div className="border-t border-border p-4 sm:p-5 bg-transparent backdrop-blur-sm">
+                  <div className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={previousStep ? () => setStep(previousStep) : undefined}
+                      disabled={!previousStep}
+                      className={cn(
+                        "px-3 sm:px-5",
+                        !previousStep 
+                          ? "bg-background/80 text-muted-foreground/60 border-muted hover:bg-background/80 hover:text-muted-foreground/60" 
+                          : "bg-background text-foreground hover:bg-background/90 border-border"
+                      )}
+                    >
+                      <ArrowLeft className="mr-1 sm:mr-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                      <span className="text-xs sm:text-sm">Previous</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={nextStep ? () => setStep(nextStep) : undefined}
+                      disabled={!nextStep}
+                      className={cn(
+                        "px-3 sm:px-6",
+                        !nextStep
+                          ? "bg-primary/60 text-primary-foreground/90 hover:bg-primary/60"
+                          : "bg-primary text-primary-foreground hover:bg-primary/90"
+                      )}
+                    >
+                      <span className="text-xs sm:text-sm">Next</span>
+                      <ArrowRight className="ml-1 sm:ml-2 h-3.5 sm:h-4 w-3.5 sm:w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
